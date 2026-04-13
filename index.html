@@ -1,1 +1,1858 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<!-- Playables SDK -->
+<script>// Playables SDK v1.0.0
+// Game lifecycle bridge: rAF-based game-ready detection + event communication
+(function() {
+  'use strict';
+
+  // Idempotency: skip if already initialized (e.g., server-side injection
+  // followed by client-side inject-javascript via the Bloks webview component).
+  if (window.playablesSDK) return;
+
+  var HANDLER_NAME = 'playablesGameEventHandler';
+  var ANDROID_BRIDGE_NAME = '_MetaPlayablesBridge';
+  var RAF_FRAME_THRESHOLD = 3;
+
+  var gameReadySent = false;
+  var firstInteractionSent = false;
+  var errorSent = false;
+  var frameCount = 0;
+  var originalRAF = window.requestAnimationFrame;
+
+  // --- Transport Layer ---
+
+  function hasIOSBridge() {
+    return !!(window.webkit &&
+              window.webkit.messageHandlers &&
+              window.webkit.messageHandlers[HANDLER_NAME]);
+  }
+
+  function hasAndroidBridge() {
+    return !!(window[ANDROID_BRIDGE_NAME] &&
+              typeof window[ANDROID_BRIDGE_NAME].postEvent === 'function');
+  }
+
+  function isInIframe() {
+    return !!(window.parent && window.parent !== window);
+  }
+
+  function sendEvent(eventName, payload) {
+    var message = {
+      type: eventName,
+      payload: payload || {},
+      timestamp: Date.now()
+    };
+
+    if (hasIOSBridge()) {
+      try {
+        window.webkit.messageHandlers[HANDLER_NAME].postMessage(message);
+      } catch (e) { /* ignore */ }
+      return;
+    }
+
+    if (hasAndroidBridge()) {
+    try {
+      var p = payload || {};
+      p.__secureToken = window.__fbAndroidBridgeAuthToken || '';
+      window[ANDROID_BRIDGE_NAME].postEvent(
+        eventName,
+        JSON.stringify(p)
+      );
+    } catch (e) { /* ignore */ }
+    return;
+  }
+
+    if (isInIframe()) {
+      try {
+        window.parent.postMessage(message, '*');
+      } catch (e) { /* ignore */ }
+      return;
+    }
+  }
+
+  // --- rAF Game-Ready Detection ---
+
+  function onFrame() {
+    if (gameReadySent) return;
+
+    frameCount++;
+    if (frameCount >= RAF_FRAME_THRESHOLD) {
+      gameReadySent = true;
+      sendEvent('game_ready', {
+        frame_count: frameCount,
+        detected_at: Date.now()
+      });
+      return;
+    }
+
+    originalRAF.call(window, onFrame);
+  }
+
+  if (originalRAF) {
+    window.requestAnimationFrame = function(callback) {
+      if (!gameReadySent) {
+        return originalRAF.call(window, function(timestamp) {
+          frameCount++;
+          if (frameCount >= RAF_FRAME_THRESHOLD && !gameReadySent) {
+            gameReadySent = true;
+            sendEvent('game_ready', {
+              frame_count: frameCount,
+              detected_at: Date.now()
+            });
+          }
+          callback(timestamp);
+        });
+      }
+      return originalRAF.call(window, callback);
+    };
+  }
+
+  // --- First User Interaction Detection ---
+
+  function setupFirstInteractionDetection() {
+    var events = ['touchstart', 'mousedown', 'keydown'];
+
+    function onFirstInteraction() {
+      if (firstInteractionSent) return;
+      firstInteractionSent = true;
+      sendEvent('user_interaction_start', null);
+
+      for (var i = 0; i < events.length; i++) {
+        document.removeEventListener(events[i], onFirstInteraction, true);
+      }
+    }
+
+    for (var i = 0; i < events.length; i++) {
+      document.addEventListener(events[i], onFirstInteraction, true);
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupFirstInteractionDetection);
+  } else {
+    setupFirstInteractionDetection();
+  }
+
+  // --- Auto Error Capture ---
+
+  window.addEventListener('error', function(event) {
+    if (errorSent) return;
+    errorSent = true;
+    sendEvent('error', {
+      message: event.message || 'Unknown error',
+      source: event.filename || '',
+      lineno: event.lineno || 0,
+      colno: event.colno || 0,
+      auto_captured: true
+    });
+  });
+
+  window.addEventListener('unhandledrejection', function(event) {
+    if (errorSent) return;
+    errorSent = true;
+    var reason = event.reason;
+    sendEvent('error', {
+      message: (reason instanceof Error) ? reason.message : String(reason),
+      type: 'unhandled_promise_rejection',
+      auto_captured: true
+    });
+  });
+
+  // --- Public API ---
+
+  window.playablesSDK = {
+    complete: function(score) {
+      sendEvent('game_ended', {
+        score: score,
+        completed: true
+      });
+    },
+
+    error: function(message) {
+      if (errorSent) return;
+      errorSent = true;
+      sendEvent('error', {
+        message: message || 'Unknown error',
+        auto_captured: false
+      });
+    },
+
+    sendEvent: function(eventName, payload) {
+      if (!eventName || typeof eventName !== 'string') return;
+      sendEvent(eventName, payload);
+    }
+  };
+
+  // Kick off rAF detection in case no game code calls rAF immediately
+  if (originalRAF) {
+    originalRAF.call(window, onFrame);
+  }
+})();</script>
+<script>window.Intl=window.Intl||{};Intl.t=function(s){return(Intl._locale&&Intl._locale[s])||s;};</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Observatório Agenda 2040 – São Borja</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #2E7D32;
+    --primary-dark: #1B5E20;
+    --primary-light: #66BB6A;
+    --primary-grad: linear-gradient(135deg, #1B5E20 0%, #4CAF50 100%);
+    --btn-grad: linear-gradient(135deg, #2E7D32 0%, #4CAF50 100%);
+    --white: #FFFFFF;
+    --bg-light: #FAFAFA;
+    --text: #212121;
+    --text-light: #616161;
+    --border: #E0E0E0;
+    --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    --shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.12);
+    --radius: 16px;
+    --red: #E53935;
+    --blue: #1E88E5;
+    --amber: #FB8C00;
+    --toast-success: #43A047;
+    --toast-error: #E53935;
+  }
+
+  [data-theme="dark"] {
+    --white: #1E1E1E;
+    --bg-light: #121212;
+    --text: #F5F5F5;
+    --text-light: #BDBDBD;
+    --border: #2C2C2C;
+    --shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    --shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.4);
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg-light);
+    color: var(--text);
+    line-height: 1.6;
+    transition: background 0.3s ease, color 0.3s ease;
+  }
+
+  h1, h2, h3, h4, h5 {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+
+  /* Animations */
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes slideUp {
+    from { transform: translateY(30px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  @keyframes slideDown {
+    from { transform: translateY(-20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+
+  @keyframes checkmark {
+    0% { stroke-dashoffset: 50; }
+    100% { stroke-dashoffset: 0; }
+  }
+
+  @keyframes ripple {
+    to {
+      transform: scale(4);
+      opacity: 0;
+    }
+  }
+
+  .fade-in { animation: fadeIn 0.6s ease forwards; }
+  .slide-up { animation: slideUp 0.6s ease forwards; }
+
+  /* Header */
+  .header {
+    position: sticky;
+    top: 0;
+    background: var(--white);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    z-index: 100;
+    transition: background 0.3s ease;
+  }
+
+  .header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 0;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    font-size: 1.25rem;
+    color: var(--primary);
+  }
+
+  .theme-toggle {
+    background: var(--bg-light);
+    border: 1px solid var(--border);
+    border-radius: 50px;
+    padding: 8px 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: var(--text);
+    transition: all 0.3s ease;
+  }
+
+  .theme-toggle:hover {
+    background: var(--primary-light);
+    color: var(--white);
+  }
+
+  /* Hero */
+  .hero {
+    background: var(--primary-grad);
+    color: var(--white);
+    padding: 80px 0 100px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: var(--bg-light);
+    clip-path: ellipse(50% 100% at 50% 100%);
+  }
+
+  .hero-content {
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr;
+    gap: 40px;
+    align-items: center;
+    position: relative;
+    z-index: 2;
+  }
+
+  .hero-text h1 {
+    font-size: 3rem;
+    font-weight: 800;
+    margin-bottom: 16px;
+    animation: slideUp 0.8s ease forwards;
+  }
+
+  .hero-text p {
+    font-size: 1.25rem;
+    opacity: 0.95;
+    margin-bottom: 32px;
+    animation: slideUp 0.8s 0.2s ease forwards;
+    opacity: 0;
+  }
+
+  .hero-cta {
+    animation: slideUp 0.8s 0.4s ease forwards;
+    opacity: 0;
+  }
+
+  .hero-illustration {
+    animation: fadeIn 1s 0.5s ease forwards;
+    opacity: 0;
+  }
+
+  /* Impact Counter */
+  .impact {
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 32px;
+    box-shadow: var(--shadow);
+    text-align: center;
+    margin-top: -60px;
+    position: relative;
+    z-index: 10;
+    animation: slideUp 0.8s ease forwards;
+  }
+
+  .impact h3 {
+    color: var(--primary);
+    font-size: 1.5rem;
+    margin-bottom: 16px;
+  }
+
+  .counter {
+    font-family: 'Poppins', sans-serif;
+    font-size: 3.5rem;
+    font-weight: 800;
+    color: var(--primary);
+    margin-bottom: 8px;
+  }
+
+  .counter-label {
+    color: var(--text-light);
+    font-size: 1rem;
+  }
+
+  /* Como Funciona */
+  .how-it-works {
+    padding: 80px 0 40px;
+  }
+
+  .section-title {
+    text-align: center;
+    font-size: 2.25rem;
+    margin-bottom: 16px;
+    color: var(--text);
+  }
+
+  .section-subtitle {
+    text-align: center;
+    color: var(--text-light);
+    margin-bottom: 48px;
+    font-size: 1.1rem;
+  }
+
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+
+  .step-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 32px 24px;
+    text-align: center;
+    box-shadow: var(--shadow);
+    transition: all 0.3s ease;
+  }
+
+  .step-card:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-hover);
+  }
+
+  .step-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 20px;
+    background: var(--bg-light);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .step-number {
+    display: inline-block;
+    background: var(--primary);
+    color: var(--white);
+    border-radius: 50px;
+    padding: 4px 12px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+
+  /* Form Section */
+  .form-section {
+    padding: 60px 0;
+  }
+
+  .form-wrapper {
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 40px;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .progress-bar {
+    height: 6px;
+    background: var(--border);
+    border-radius: 10px;
+    margin-bottom: 32px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--btn-grad);
+    width: 0%;
+    transition: width 0.4s ease;
+    border-radius: 10px;
+  }
+
+  .form-group {
+    margin-bottom: 24px;
+  }
+
+  .form-label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 12px;
+    font-size: 1rem;
+  }
+
+  .type-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+
+  .type-card {
+    border: 2px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    text-align: center;
+  }
+
+  .type-card:hover {
+    border-color: var(--primary-light);
+    transform: translateY(-4px);
+    box-shadow: var(--shadow);
+  }
+
+  .type-card.selected {
+    border-color: var(--primary);
+    background: rgba(76, 175, 80, 0.05);
+  }
+
+  .type-icon {
+    width: 48px;
+    height: 48px;
+    margin: 0 auto 12px;
+  }
+
+  .info-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: var(--bg-light);
+    border: none;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    transition: all 0.2s ease;
+  }
+
+  .info-btn:hover {
+    background: var(--primary-light);
+    color: var(--white);
+  }
+
+  .input-mode {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .mode-btn {
+    flex: 1;
+    padding: 12px;
+    border: 2px solid var(--border);
+    background: var(--white);
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    color: var(--text);
+  }
+
+  .mode-btn.active {
+    border-color: var(--primary);
+    background: var(--primary);
+    color: var(--white);
+  }
+
+  textarea {
+    width: 100%;
+    padding: 16px;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    font-family: 'Inter', sans-serif;
+    font-size: 1rem;
+    resize: vertical;
+    min-height: 120px;
+    transition: border 0.3s ease;
+    background: var(--white);
+    color: var(--text);
+  }
+
+  textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+  }
+
+  .audio-controls {
+    display: none;
+    gap: 12px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+  }
+
+  .audio-controls.show {
+    display: flex;
+  }
+
+  select, input[type="text"] {
+    width: 100%;
+    padding: 14px 16px;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    font-family: 'Inter', sans-serif;
+    font-size: 1rem;
+    background: var(--white);
+    color: var(--text);
+    transition: border 0.3s ease;
+  }
+
+  select:focus, input[type="text"]:focus {
+    outline: none;
+    border-color: var(--primary);
+  }
+
+  .location-group {
+    display: flex;
+    gap: 12px;
+  }
+
+  .location-group input {
+    flex: 1;
+  }
+
+  .btn {
+    position: relative;
+    padding: 14px 28px;
+    border: none;
+    border-radius: 12px;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    overflow: hidden;
+  }
+
+  .btn-primary {
+    background: var(--btn-grad);
+    color: var(--white);
+    width: 100%;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(46, 125, 50, 0.4);
+  }
+
+  .btn-secondary {
+    background: var(--bg-light);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+
+  .btn-secondary:hover {
+    background: var(--border);
+  }
+
+  .ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.6);
+    transform: scale(0);
+    animation: ripple 0.6s linear;
+    pointer-events: none;
+  }
+
+  /* Modal */
+  .modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(8px);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .modal.show {
+    display: flex;
+  }
+
+  .modal-content {
+    background: var(--white);
+    border-radius: var(--radius);
+    max-width: 600px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 40px;
+    position: relative;
+    animation: slideDown 0.3s ease;
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: var(--bg-light);
+    border: none;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    cursor: pointer;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+  }
+
+  .modal-close:hover {
+    background: var(--border);
+    transform: rotate(90deg);
+  }
+
+  /* Success Animation */
+  .success-modal {
+    text-align: center;
+  }
+
+  .success-check {
+    width: 100px;
+    height: 100px;
+    margin: 0 auto 24px;
+  }
+
+  .success-check circle {
+    stroke: var(--primary);
+    stroke-width: 3;
+    fill: none;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .success-check path {
+    stroke: var(--primary);
+    stroke-width: 4;
+    fill: none;
+    stroke-dasharray: 50;
+    stroke-dashoffset: 50;
+    animation: checkmark 0.5s 0.3s ease forwards;
+  }
+
+  /* Dashboard */
+  .dashboard {
+    padding: 60px 0;
+    background: var(--white);
+  }
+
+  .dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .filter-select {
+    min-width: 200px;
+  }
+
+  .word-cloud {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 40px;
+    justify-content: center;
+  }
+
+  .word-tag {
+    background: var(--bg-light);
+    padding: 8px 16px;
+    border-radius: 50px;
+    font-size: 0.875rem;
+    transition: all 0.3s ease;
+  }
+
+  .word-tag:hover {
+    background: var(--primary-light);
+    color: var(--white);
+    transform: scale(1.05);
+  }
+
+  .contributions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 24px;
+  }
+
+  .contribution-card {
+    background: var(--bg-light);
+    border-radius: var(--radius);
+    padding: 24px;
+    box-shadow: var(--shadow);
+    transition: all 0.3s ease;
+    border-left: 4px solid var(--primary);
+  }
+
+  .contribution-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-hover);
+  }
+
+  .contribution-card.problema { border-left-color: var(--red); }
+  .contribution-card.ideia { border-left-color: var(--blue); }
+  .contribution-card.oportunidade { border-left-color: var(--amber); }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+
+  .badge-problema { background: rgba(229, 57, 53, 0.15); color: var(--red); }
+  .badge-ideia { background: rgba(30, 136, 229, 0.15); color: var(--blue); }
+  .badge-oportunidade { background: rgba(251, 140, 0, 0.15); color: var(--amber); }
+
+  .contribution-meta {
+    display: flex;
+    gap: 16px;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    font-size: 0.875rem;
+    color: var(--text-light);
+    flex-wrap: wrap;
+  }
+
+  /* Skeleton */
+  .skeleton {
+    background: linear-gradient(90deg, var(--border) 25%, var(--bg-light) 50%, var(--border) 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+    border-radius: 8px;
+  }
+
+  @keyframes loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  /* Toast */
+  .toast-container {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .toast {
+    background: var(--white);
+    border-radius: 12px;
+    padding: 16px 20px;
+    box-shadow: var(--shadow-hover);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 300px;
+    animation: slideUp 0.3s ease;
+  }
+
+  .toast.success { border-left: 4px solid var(--toast-success); }
+  .toast.error { border-left: 4px solid var(--toast-error); }
+
+  /* Footer */
+  .footer {
+    background: var(--primary-dark);
+    color: var(--white);
+    padding: 40px 0;
+    text-align: center;
+    margin-top: 60px;
+  }
+
+  .footer-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+  }
+
+  /* Responsive */
+  @media (max-width: 968px) {
+    .hero-content {
+      grid-template-columns: 1fr;
+      text-align: center;
+    }
+
+    .hero-text h1 {
+      font-size: 2.25rem;
+    }
+
+    .steps {
+      grid-template-columns: 1fr;
+    }
+
+    .type-cards {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .form-wrapper {
+      padding: 24px 20px;
+    }
+
+    .modal-content {
+      padding: 24px;
+    }
+
+    .dashboard-header {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .contributions-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .toast {
+      min-width: auto;
+      right: 12px;
+      left: 12px;
+    }
+  }
+
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="header">
+  <div class="container">
+    <div class="header-content">
+      <div class="logo">
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+          <circle cx="16" cy="16" r="16" fill="url(#logoGrad)"/>
+          <path d="M16 8L20 16H12L16 8Z" fill="white"/>
+          <path d="M10 20H22V22H10V20Z" fill="white"/>
+          <defs>
+            <linearGradient id="logoGrad" x1="0" y1="0" x2="32" y2="32">
+              <stop stop-color="#1B5E20"/>
+              <stop offset="1" stop-color="#4CAF50"/>
+            </linearGradient>
+          </defs>
+        </svg>
+        Observatório Agenda 2040
+      </div>
+      <button class="theme-toggle" id="themeToggle" aria-label="Alternar modo escuro">
+        <span id="themeIcon">🌙</span>
+        <span id="themeText">Modo Escuro</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-content">
+      <div class="hero-text">
+        <h1>Ajude a construir o futuro da nossa cidade</h1>
+        <p>Não precisa escrever perfeito. Escreva como você fala.</p>
+        <div class="hero-cta">
+          <button class="btn btn-primary" onclick="document.getElementById('formSection').scrollIntoView()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 5v14M5 12h14"/>
+            </svg>
+            Fazer minha contribuição
+          </button>
+        </div>
+      </div>
+      <div class="hero-illustration">
+        <svg viewBox="0 0 400 300" fill="none">
+          <circle cx="200" cy="150" r="120" fill="rgba(255,255,255,0.1)"/>
+          <path d="M100 180H300V220H100V180Z" fill="rgba(255,255,255,0.2)"/>
+          <rect x="140" y="100" width="40" height="80" fill="white" opacity="0.9"/>
+          <rect x="190" y="80" width="40" height="100" fill="white" opacity="0.9"/>
+          <rect x="240" y="120" width="40" height="60" fill="white" opacity="0.9"/>
+          <circle cx="160" cy="120" r="8" fill="#66BB6A"/>
+          <circle cx="210" cy="100" r="8" fill="#66BB6A"/>
+          <circle cx="260" cy="140" r="8" fill="#66BB6A"/>
+          <path d="M150 250C150 230 170 220 200 220C230 220 250 230 250 250" stroke="white" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Impact Counter -->
+<section class="container">
+  <div class="impact">
+    <h3>Sua voz constrói o futuro</h3>
+    <div class="counter" id="counter">0</div>
+    <p class="counter-label">contribuições já recebidas</p>
+  </div>
+</section>
+
+<!-- Como Funciona -->
+<section class="how-it-works">
+  <div class="container">
+    <h2 class="section-title">Como funciona</h2>
+    <p class="section-subtitle">Participar é simples e leva menos de 2 minutos</p>
+    <div class="steps">
+      <div class="step-card">
+        <div class="step-icon">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#2E7D32" stroke-width="2">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+          </svg>
+        </div>
+        <span class="step-number">Passo 1</span>
+        <h3>Escolha o tipo</h3>
+        <p>Informe se é um problema, uma ideia ou uma oportunidade que você vê para São Borja.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-icon">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#2E7D32" stroke-width="2">
+            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/>
+          </svg>
+        </div>
+        <span class="step-number">Passo 2</span>
+        <h3>Compartilhe</h3>
+        <p>Escreva ou grave um áudio contando sobre o assunto. Fale do seu jeito, sem formalidade.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-icon">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#2E7D32" stroke-width="2">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+        </div>
+        <span class="step-number">Passo 3</span>
+        <h3>Envie</h3>
+        <p>Pronto! Sua contribuição será analisada e ajudará a planejar São Borja rumo a 2040.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Form Section -->
+<section class="form-section" id="formSection">
+  <div class="container">
+    <div class="form-wrapper">
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+
+      <form id="contributionForm">
+        <!-- Tipo -->
+        <div class="form-group">
+          <label class="form-label">1. Qual tipo de contribuição você quer fazer?</label>
+          <div class="type-cards">
+            <div class="type-card" data-type="problema" tabindex="0">
+              <button type="button" class="info-btn" data-info="problema" aria-label="Mais informações sobre Problema">ℹ️</button>
+              <svg class="type-icon" viewBox="0 0 48 48" fill="none">
+                <circle cx="24" cy="24" r="22" fill="#FFEBEE"/>
+                <path d="M24 14v12M24 32v2" stroke="#E53935" stroke-width="3" stroke-linecap="round"/>
+              </svg>
+              <h4>Problema</h4>
+              <p style="font-size: 0.875rem; color: var(--text-light);">Algo que precisa melhorar</p>
+            </div>
+            <div class="type-card" data-type="ideia" tabindex="0">
+              <button type="button" class="info-btn" data-info="ideia" aria-label="Mais informações sobre Ideia">ℹ️</button>
+              <svg class="type-icon" viewBox="0 0 48 48" fill="none">
+                <circle cx="24" cy="24" r="22" fill="#E3F2FD"/>
+                <path d="M24 30V16M18 22h12" stroke="#1E88E5" stroke-width="3" stroke-linecap="round"/>
+              </svg>
+              <h4>Ideia</h4>
+              <p style="font-size: 0.875rem; color: var(--text-light);">Sugestão para a cidade</p>
+            </div>
+            <div class="type-card" data-type="oportunidade" tabindex="0">
+              <button type="button" class="info-btn" data-info="oportunidade" aria-label="Mais informações sobre Oportunidade">ℹ️</button>
+              <svg class="type-icon" viewBox="0 0 48 48" fill="none">
+                <circle cx="24" cy="24" r="22" fill="#FFF3E0"/>
+                <path d="M18 30l6-12 6 12M21 26h6" stroke="#FB8C00" stroke-width="3" stroke-linecap="round"/>
+              </svg>
+              <h4>Oportunidade</h4>
+              <p style="font-size: 0.875rem; color: var(--text-light);">Potencial a aproveitar</p>
+            </div>
+          <input type="hidden" id="tipoContribuicao" required>
+        </div>
+
+        <!-- Conteúdo -->
+        <div class="form-group">
+          <label class="form-label">2. Descreva sua contribuição</label>
+          <div class="input-mode">
+            <button type="button" class="mode-btn active" data-mode="texto">✍️ Escrever</button>
+            <button type="button" class="mode-btn" data-mode="audio">🎤 Gravar Áudio</button>
+          </div>
+          <div id="textInput">
+            <textarea id="mensagem" placeholder="Conte aqui com suas palavras..." required></textarea>
+          </div>
+          <div class="audio-controls" id="audioInput">
+            <button type="button" class="btn btn-secondary" id="btnGravar">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="8"/></svg>
+              Gravar
+            </button>
+            <button type="button" class="btn btn-secondary hidden" id="btnParar">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12"/></svg>
+              Parar
+            </button>
+            <button type="button" class="btn btn-secondary hidden" id="btnOuvir">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              Ouvir
+            </button>
+            <span id="audioStatus" style="color: var(--text-light); align-self: center;"></span>
+          </div>
+        </div>
+
+        <!-- Eixo Temático -->
+        <div class="form-group">
+          <label class="form-label" for="eixo">3. Sobre qual tema é sua contribuição?</label>
+          <select id="eixo" required>
+            <option value="">Selecione um eixo temático</option>
+            <option value="desenvolvimento_economico">🏭 Desenvolvimento Econômico</option>
+            <option value="educacao">📚 Educação</option>
+            <option value="saude">❤️ Saúde</option>
+            <option value="meio_ambiente">🌳 Meio Ambiente</option>
+            <option value="mobilidade">🚌 Mobilidade Urbana</option>
+            <option value="cultura">🎭 Cultura e Turismo</option>
+            <option value="seguranca">🛡️ Segurança</option>
+            <option value="infraestrutura">🏗️ Infraestrutura</option>
+            <option value="social">🤝 Desenvolvimento Social</option>
+            <option value="tecnologia">💻 Tecnologia e Inovação</option>
+          </select>
+        </div>
+
+        <!-- Localização -->
+        <div class="form-group">
+          <label class="form-label" for="localizacao">4. Onde fica? (bairro, rua ou região)</label>
+          <div class="location-group">
+            <input type="text" id="localizacao" placeholder="Ex: Centro, Bairro do Passo, Rua das Flores...">
+            <button type="button" class="btn btn-secondary" id="btnGps">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="3"/><path d="M12 2v6M12 16v6M2 12h6M16 12h6"/>
+              </svg>
+              GPS
+            </button>
+          </div>
+        </div>
+
+        <!-- Opcionais -->
+        <div class="form-group">
+          <label class="form-label" for="nome">5. Quer se identificar? (opcional)</label>
+          <input type="text" id="nome" placeholder="Seu nome">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="instituicao">Representa alguma instituição? (opcional)</label>
+          <input type="text" id="instituicao" placeholder="Ex: Associação de Moradores, Escola, Empresa...">
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 2L11 13M22 2l-7 20-4-9-4 20-7z"/>
+          </svg>
+          Enviar contribuição
+        </button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- Dashboard -->
+<section class="dashboard">
+  <div class="container">
+    <h2 class="section-title">Contribuições da Comunidade</h2>
+    <p class="section-subtitle">Veja o que outros cidadãos estão sugerindo para São Borja</p>
+
+    <div class="dashboard-header">
+      <h3 id="totalExibido">Carregando...</h3>
+      <select id="filtroEixo" class="filter-select">
+        <option value="todos">Todos os eixos</option>
+        <option value="desenvolvimento_economico">🏭 Desenvolvimento Econômico</option>
+        <option value="educacao">📚 Educação</option>
+        <option value="saude">❤️ Saúde</option>
+        <option value="meio_ambiente">🌳 Meio Ambiente</option>
+        <option value="mobilidade">🚌 Mobilidade Urbana</option>
+        <option value="cultura">🎭 Cultura e Turismo</option>
+        <option value="seguranca">🛡️ Segurança</option>
+        <option value="infraestrutura">🏗️ Infraestrutura</option>
+        <option value="social">🤝 Desenvolvimento Social</option>
+        <option value="tecnologia">💻 Tecnologia e Inovação</option>
+      </select>
+    </div>
+
+    <h4 style="margin-bottom: 16px; text-align: center;">Temas mais mencionados</h4>
+    <div class="word-cloud" id="wordCloud"></div>
+
+    <div class="contributions-grid" id="contributionsGrid"></div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-logo">
+      <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+        <circle cx="16" cy="16" r="16" fill="white" opacity="0.2"/>
+        <path d="M16 8L20 16H12L16 8Z" fill="white"/>
+        <path d="M10 20H22V22H10V20Z" fill="white"/>
+      </svg>
+      Agenda 2040
+    </div>
+    <p>São Borja rumo a 2040</p>
+    <p style="margin-top: 16px; opacity: 0.7; font-size: 0.875rem;">Construindo juntos o futuro da nossa cidade</p>
+  </div>
+</footer>
+
+<!-- Modais Informativas -->
+<div class="modal" id="modalInfo">
+  <div class="modal-content">
+    <button class="modal-close" onclick="closeModal('modalInfo')">×</button>
+    <div id="modalInfoContent"></div>
+  </div>
+</div>
+
+<!-- Modal Sucesso -->
+<div class="modal" id="modalSuccess">
+  <div class="modal-content success-modal">
+    <svg class="success-check" viewBox="0 0 100 100">
+      <circle cx="50" cy="50" r="45"/>
+      <path d="M30 50l15 15 25-30"/>
+    </svg>
+    <h2 style="color: var(--primary); margin-bottom: 16px;">Obrigado pela sua contribuição!</h2>
+    <p style="margin-bottom: 24px; color: var(--text-light);">Sua voz é fundamental para construirmos juntos o futuro de São Borja. Nossa equipe irá analisar sua sugestão.</p>
+    <button class="btn btn-primary" onclick="closeModal('modalSuccess')">Fechar</button>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+  // Estado da aplicação
+  let contributions = [];
+  let mediaRecorder = null;
+  let audioChunks = [];
+  let audioBlob = null;
+  let currentAudioURL = null;
+
+  // Keywords para sugestão automática de eixo
+  const eixoKeywords = {
+    desenvolvimento_economico: ['emprego', 'trabalho', 'empresa', 'indústria', 'comércio', 'negócio', 'renda', 'economia'],
+    educacao: ['escola', 'aluno', 'professor', 'ensino', 'creche', 'faculdade', 'estudar', 'educação'],
+    saude: ['hospital', 'posto', 'médico', 'saúde', 'consulta', 'upA', 'remédio', 'atendimento'],
+    meio_ambiente: ['lixo', 'árvore', 'rio', 'poluição', 'sustentável', 'reciclar', 'verde', 'ambiental'],
+    mobilidade: ['ônibus', 'rua', 'trânsito', 'asfalto', 'calçada', 'ciclovia', 'transporte', 'buraco'],
+    cultura: ['evento', 'festa', 'turismo', 'cultura', 'patrimônio', 'museu', 'arte', 'história'],
+    seguranca: ['polícia', 'segurança', 'crime', 'iluminação', 'guarda', 'roubo', 'violência'],
+    infraestrutura: ['água', 'esgoto', 'luz', 'energia', 'saneamento', 'obra', 'construção'],
+    social: ['idoso', 'criança', 'assistência', 'social', 'moradia', 'habitação', 'família'],
+    tecnologia: ['internet', 'wifi', 'tecnologia', 'digital', 'inovação', 'sistema', 'app']
+  };
+
+  // Informações das modais
+  const modalInfos = {
+    problema: {
+      title: '🔴 O que é um Problema?',
+      content: `
+        <svg viewBox="0 0 200 120" style="width: 100%; max-width: 300px; margin: 0 auto 20px; display: block;">
+          <rect x="40" y="40" width="120" height="60" rx="8" fill="#FFEBEE"/>
+          <path d="M100 55v20M100 85v2" stroke="#E53935" stroke-width="4" stroke-linecap="round"/>
+          <rect x="60" y="30" width="80" height="8" rx="4" fill="#E53935" opacity="0.3"/>
+        </svg>
+        <p style="margin-bottom: 16px;">Um <strong>problema</strong> é algo que afeta negativamente a qualidade de vida na cidade e precisa ser resolvido.</p>
+        <h4 style="margin: 20px 0 12px;">Exemplos reais de São Borja:</h4>
+        <ul style="line-height: 1.8;">
+          <li>Falta de iluminação na Rua das Missões, causando insegurança à noite</li>
+          <li>Buracos na avenida principal dificultando o trânsito</li>
+          <li>Demora no atendimento do posto de saúde do Bairro do Passo</li>
+          <li>Acúmulo de lixo em terrenos baldios no Centro</li>
+        </ul>
+      `
+    },
+    ideia: {
+      title: '💡 O que é uma Ideia?',
+      content: `
+        <svg viewBox="0 0 200 120" style="width: 100%; max-width: 300px; margin: 0 auto 20px; display: block;">
+          <circle cx="100" cy="60" r="35" fill="#E3F2FD"/>
+          <path d="M100 45v25M85 60h30" stroke="#1E88E5" stroke-width="4" stroke-linecap="round"/>
+          <path d="M80 80q20 10 40 0" stroke="#1E88E5" stroke-width="3" fill="none" stroke-linecap="round"/>
+        </svg>
+        <p style="margin-bottom: 16px;">Uma <strong>ideia</strong> é uma sugestão ou proposta para melhorar algo na cidade ou implementar algo novo.</p>
+        <h4 style="margin: 20px 0 12px;">Exemplos reais de São Borja:</h4>
+        <ul style="line-height: 1.8;">
+          <li>Criar uma feira de produtores locais aos domingos na Praça Central</li>
+          <li>Implantar ciclovia ligando os bairros ao Centro</li>
+          <li>Oficinas de capacitação para jovens na Casa de Cultura</li>
+          <li>App para acompanhar horários do transporte público</li>
+        </ul>
+      `
+    },
+    oportunidade: {
+      title: '📈 O que é uma Oportunidade?',
+      content: `
+        <svg viewBox="0 0 200 120" style="width: 100%; max-width: 300px; margin: 0 auto 20px; display: block;">
+          <rect x="50" y="70" width="100" height="30" rx="8" fill="#FFF3E0"/>
+          <path d="M70 70L90 40L110 55L130 30" stroke="#FB8C00" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="90" cy="40" r="4" fill="#FB8C00"/>
+          <circle cx="110" cy="55" r="4" fill="#FB8C00"/>
+          <circle cx="130" cy="30" r="4" fill="#FB8C00"/>
+        </svg>
+        <p style="margin-bottom: 16px;">Uma <strong>oportunidade</strong> é um potencial existente na cidade que pode ser aproveitado para gerar desenvolvimento.</p>
+        <h4 style="margin: 20px 0 12px;">Exemplos reais de São Borja:</h4>
+        <ul style="line-height: 1.8;">
+          <li>Patrimônio histórico das Missões pode atrair mais turismo cultural</li>
+          <li>Terra fértil da região pode fortalecer a agricultura familiar</li>
+          <li>Localização estratégica na fronteira favorece o comércio internacional</li>
+          <li>Rio Uruguai tem potencial para atividades náuticas e lazer</li>
+        </ul>
+      `
+    }
+  };
+
+  // Inicialização
+  document.addEventListener('DOMContentLoaded', () => {
+    loadContributions();
+    setupEventListeners();
+    updateCounter();
+    renderDashboard();
+    checkDarkMode();
+  });
+
+  // Setup de Event Listeners
+  function setupEventListeners() {
+    // Theme toggle
+    document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+
+    // Type cards
+    document.querySelectorAll('.type-card').forEach(card => {
+      card.addEventListener('click', function(e) {
+        if (!e.target.classList.contains('info-btn')) {
+          selectType(this.dataset.type);
+        }
+      });
+    });
+
+    // Info buttons
+    document.querySelectorAll('.info-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        showModalInfo(btn.dataset.info);
+      });
+    });
+
+    // Mode buttons
+    document.querySelectorAll('.mode-btn').forEach(btn => {
+      btn.addEventListener('click', () => switchInputMode(btn.dataset.mode));
+    });
+
+    // Audio buttons
+    document.getElementById('btnGravar').addEventListener('click', startRecording);
+    document.getElementById('btnParar').addEventListener('click', stopRecording);
+    document.getElementById('btnOuvir').addEventListener('click', playAudio);
+
+    // GPS
+    document.getElementById('btnGps').addEventListener('click', getLocation);
+
+    // Form
+    document.getElementById('contributionForm').addEventListener('submit', handleSubmit);
+
+    // Mensagem textarea - sugestão de eixo
+    document.getElementById('mensagem').addEventListener('input', suggestEixo);
+
+    // Filtro
+    document.getElementById('filtroEixo').addEventListener('change', renderDashboard);
+
+    // Progress
+    document.querySelectorAll('#contributionForm input, #contributionForm select, #contributionForm textarea').forEach(el => {
+      el.addEventListener('change', updateProgress);
+      el.addEventListener('input', updateProgress);
+    });
+
+    // Ripple effect
+    document.querySelectorAll('.btn').forEach(btn => {
+      btn.addEventListener('click', createRipple);
+    });
+  }
+
+  // Dark Mode
+  function checkDarkMode() {
+    const theme = localStorage.getItem('theme') || 'light';
+    if (theme === 'dark') {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      document.getElementById('themeIcon').textContent = '☀️';
+      document.getElementById('themeText').textContent = 'Modo Claro';
+    }
+  }
+
+  function toggleTheme() {
+    const current = document.documentElement.getAttribute('data-theme');
+    if (current === 'dark') {
+      document.documentElement.removeAttribute('data-theme');
+      localStorage.setItem('theme', 'light');
+      document.getElementById('themeIcon').textContent = '🌙';
+      document.getElementById('themeText').textContent = 'Modo Escuro';
+    } else {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      localStorage.setItem('theme', 'dark');
+      document.getElementById('themeIcon').textContent = '☀️';
+      document.getElementById('themeText').textContent = 'Modo Claro';
+    }
+  }
+
+  // Tipo de contribuição
+  function selectType(type) {
+    document.querySelectorAll('.type-card').forEach(card => {
+      card.classList.remove('selected');
+    });
+    document.querySelector(`[data-type="${type}"]`).classList.add('selected');
+    document.getElementById('tipoContribuicao').value = type;
+    updateProgress();
+    suggestPlaceholder(type);
+  }
+
+  function suggestPlaceholder(type) {
+    const placeholders = {
+      problema: 'Descreva o problema que você identificou... Ex: A rua X está com muitos buracos...',
+      ideia: 'Conte sua ideia para melhorar a cidade... Ex: Poderíamos criar uma feira de produtores...',
+      oportunidade: 'Qual potencial você vê na cidade? Ex: O patrimônio histórico poderia atrair mais turistas...'
+    };
+    document.getElementById('mensagem').placeholder = placeholders[type] || 'Conte aqui com suas palavras...';
+  }
+
+  // Modo de entrada
+  function switchInputMode(mode) {
+    document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelector(`[data-mode="${mode}"]`).classList.add('active');
+    
+    if (mode === 'texto') {
+      document.getElementById('textInput').classList.remove('hidden');
+      document.getElementById('audioInput').classList.remove('show');
+      document.getElementById('mensagem').required = true;
+    } else {
+      document.getElementById('textInput').classList.add('hidden');
+      document.getElementById('audioInput').classList.add('show');
+      document.getElementById('mensagem').required = false;
+    }
+  }
+
+  // Gravação de áudio
+  async function startRecording() {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaRecorder = new MediaRecorder(stream);
+      audioChunks = [];
+
+      mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+      mediaRecorder.onstop = () => {
+        audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+        currentAudioURL = URL.createObjectURL(audioBlob);
+        document.getElementById('btnOuvir').classList.remove('hidden');
+        document.getElementById('audioStatus').textContent = 'Áudio gravado ✓';
+        updateProgress();
+      };
+
+      mediaRecorder.start();
+      document.getElementById('btnGravar').classList.add('hidden');
+      document.getElementById('btnParar').classList.remove('hidden');
+      document.getElementById('audioStatus').textContent = 'Gravando...';
+    } catch (err) {
+      showToast('Erro ao acessar microfone. Verifique as permissões.', 'error');
+    }
+  }
+
+  function stopRecording() {
+    if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+      mediaRecorder.stop();
+      mediaRecorder.stream.getTracks().forEach(track => track.stop());
+      document.getElementById('btnGravar').classList.remove('hidden');
+      document.getElementById('btnParar').classList.add('hidden');
+    }
+  }
+
+  function playAudio() {
+    if (currentAudioURL) {
+      const audio = new Audio(currentAudioURL);
+      audio.play();
+    }
+  }
+
+  // GPS
+  function getLocation() {
+    if (navigator.geolocation) {
+      document.getElementById('btnGps').textContent = 'Buscando...';
+      navigator.geolocation.getCurrentPosition(
+        position => {
+          document.getElementById('localizacao').value = `Lat: ${position.coords.latitude.toFixed(4)}, Long: ${position.coords.longitude.toFixed(4)}`;
+          document.getElementById('btnGps').innerHTML = `
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="3"/><path d="M12 2v6M12 16v6M2 12h6M16 12h6"/>
+            </svg>
+            GPS ✓`;
+          showToast('Localização obtida com sucesso!', 'success');
+        },
+        error => {
+          showToast('Não foi possível obter sua localização.', 'error');
+          document.getElementById('btnGps').innerHTML = `
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="3"/><path d="M12 2v6M12 16v6M2 12h6M16 12h6"/>
+            </svg>
+            GPS`;
+        }
+      );
+    } else {
+      showToast('Geolocalização não suportada neste navegador.', 'error');
+    }
+  }
+
+  // Sugestão de eixo por keywords
+  function suggestEixo() {
+    const text = document.getElementById('mensagem').value.toLowerCase();
+    if (text.length < 10) return;
+
+    let maxCount = 0;
+    let suggestedEixo = '';
+
+    for (const [eixo, keywords] of Object.entries(eixoKeywords)) {
+      let count = 0;
+      keywords.forEach(keyword => {
+        if (text.includes(keyword)) count++;
+      });
+      if (count > maxCount) {
+        maxCount = count;
+        suggestedEixo = eixo;
+      }
+    }
+
+    if (suggestedEixo && !document.getElementById('eixo').value) {
+      document.getElementById('eixo').value = suggestedEixo;
+      updateProgress();
+    }
+  }
+
+  // Progress bar
+  function updateProgress() {
+    const fields = ['tipoContribuicao', 'eixo'];
+    let filled = 0;
+    
+    if (document.getElementById('tipoContribuicao').value) filled++;
+    if (document.getElementById('eixo').value) filled++;
+    if (document.getElementById('mensagem').value || audioBlob) filled++;
+
+    const progress = (filled / 3) * 100;
+    document.getElementById('progressFill').style.width = progress + '%';
+  }
+
+  // Submit
+  function handleSubmit(e) {
+    e.preventDefault();
+
+    const tipo = document.getElementById('tipoContribuicao').value;
+    const mensagem = document.getElementById('mensagem').value;
+    const eixo = document.getElementById('eixo').value;
+
+    if (!tipo) {
+      showToast('Por favor, selecione o tipo de contribuição.', 'error');
+      return;
+    }
+
+    if (!mensagem && !audioBlob) {
+      showToast('Por favor, escreva ou grave sua contribuição.', 'error');
+      return;
+    }
+
+    if (!eixo) {
+      showToast('Por favor, selecione um eixo temático.', 'error');
+      return;
+    }
+
+    const contribution = {
+      id: Date.now(),
+      tipo,
+      mensagem: mensagem || '[Áudio gravado]',
+      eixo,
+      localizacao: document.getElementById('localizacao').value || 'Não informado',
+      nome: document.getElementById('nome').value || 'Anônimo',
+      instituicao: document.getElementById('instituicao').value || null,
+      data: new Date().toISOString(),
+      hasAudio: !!audioBlob
+    };
+
+    contributions.unshift(contribution);
+    saveContributions();
+    resetForm();
+    showModal('modalSuccess');
+    updateCounter();
+    renderDashboard();
+  }
+
+  function resetForm() {
+    document.getElementById('contributionForm').reset();
+    document.querySelectorAll('.type-card').forEach(card => card.classList.remove('selected'));
+    document.getElementById('tipoContribuicao').value = '';
+    audioBlob = null;
+    currentAudioURL = null;
+    document.getElementById('btnOuvir').classList.add('hidden');
+    document.getElementById('audioStatus').textContent = '';
+    document.getElementById('progressFill').style.width = '0%';
+    switchInputMode('texto');
+  }
+
+  // LocalStorage
+  function saveContributions() {
+    localStorage.setItem('agenda2040_contributions', JSON.stringify(contributions));
+  }
+
+  function loadContributions() {
+    const saved = localStorage.getItem('agenda2040_contributions');
+    if (saved) {
+      contributions = JSON.parse(saved);
+    } else {
+      // Dados de exemplo
+      contributions = [
+        { id: 1, tipo: 'problema', mensagem: 'Falta de iluminação na Rua das Missões está deixando a região perigosa à noite.', eixo: 'seguranca', localizacao: 'Rua das Missões', nome: 'Maria Silva', data: '2025-09-01T10:30:00Z', hasAudio: false },
+        { id: 2, tipo: 'ideia', mensagem: 'Criar uma feira de produtores locais aos domingos na praça central para fortalecer a economia.', eixo: 'desenvolvimento_economico', localizacao: 'Praça Central', nome: 'João Santos', data: '2025-09-02T14:20:00Z', hasAudio: false },
+        { id: 3, tipo: 'oportunidade', mensagem: 'O patrimônio histórico das Missões tem grande potencial turístico que pode ser melhor explorado.', eixo: 'cultura', localizacao: 'Sítio Histórico', nome: 'Anônimo', data: '2025-09-03T09:15:00Z', hasAudio: false }
+      ];
+      saveContributions();
+    }
+  }
+
+  // Counter animado
+  function updateCounter() {
+    const target = contributions.length;
+    const counter = document.getElementById('counter');
+    const start = parseInt(counter.textContent) || 0;
+    const duration = 1000;
+    const startTime = performance.now();
+
+    function animate(currentTime) {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const current = Math.floor(start + (target - start) * progress);
+      counter.textContent = current;
+
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      }
+    }
+
+    requestAnimationFrame(animate);
+  }
+
+  // Dashboard
+  function renderDashboard() {
+    const filter = document.getElementById('filtroEixo').value;
+    const filtered = filter === 'todos' ? contributions : contributions.filter(c => c.eixo === filter);
+    
+    document.getElementById('totalExibido').textContent = `${filtered.length} contribuição${filtered.length !== 1 ? 'es' : ''}`;
+    
+    renderWordCloud();
+    renderContributions(filtered);
+  }
+
+  function renderWordCloud() {
+    const words = {};
+    contributions.forEach(c => {
+      const text = c.mensagem.toLowerCase();
+      const tokens = text.match(/\b\w{4,}\b/g) || [];
+      tokens.forEach(word => {
+        if (!['para', 'como', 'mais', 'pode', 'seria', 'deveria', 'muito'].includes(word)) {
+          words[word] = (words[word] || 0) + 1;
+        }
+      });
+    });
+
+    const sorted = Object.entries(words).sort((a, b) => b[1] - a[1]).slice(0, 15);
+    const cloud = document.getElementById('wordCloud');
+    cloud.innerHTML = '';
+
+    sorted.forEach(([word, count]) => {
+      const size = 0.8 + (count / sorted[0][1]) * 0.4;
+      const tag = document.createElement('div');
+      tag.className = 'word-tag';
+      tag.style.fontSize = size + 'rem';
+      tag.textContent = word;
+      cloud.appendChild(tag);
+    });
+  }
+
+  function renderContributions(list) {
+    const grid = document.getElementById('contributionsGrid');
+    
+    if (list.length === 0) {
+      grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--text-light);">Nenhuma contribuição encontrada.</p>';
+      return;
+    }
+
+    // Skeleton loading
+    grid.innerHTML = Array(3).fill(0).map(() => `
+      <div class="contribution-card">
+        <div class="skeleton" style="width: 120px; height: 24px; margin-bottom: 12px;"></div>
+        <div class="skeleton" style="width: 100%; height: 60px; margin-bottom: 12px;"></div>
+        <div class="skeleton" style="width: 80%; height: 16px;"></div>
+      </div>
+    `).join('');
+
+    setTimeout(() => {
+      grid.innerHTML = list.map(c => {
+        const badges = {
+          problema: { icon: '🔴', class: 'badge-problema', label: 'Problema' },
+          ideia: { icon: '💡', class: 'badge-ideia', label: 'Ideia' },
+          oportunidade: { icon: '📈', class: 'badge-oportunidade', label: 'Oportunidade' }
+        };
+        const badge = badges[c.tipo];
+        const date = new Date(c.data).toLocaleDateString('pt-BR');
+        const eixoText = document.querySelector(`#eixo option[value="${c.eixo}"]`)?.textContent || c.eixo;
+
+        return `
+          <div class="contribution-card ${c.tipo} fade-in">
+            <span class="badge ${badge.class}">${badge.icon} ${badge.label}</span>
+            <p style="margin-bottom: 12px;">${c.mensagem}</p>
+            <div class="contribution-meta">
+              <span>📍 ${c.localizacao}</span>
+              <span>📅 ${date}</span>
+              <span>🏷️ ${eixoText}</span>
+              ${c.hasAudio ? '<span>🎤 Áudio</span>' : ''}
+            </div>
+            ${c.nome !== 'Anônimo' ? `<p style="margin-top: 12px; font-size: 0.875rem; color: var(--text-light);">Por: ${c.nome}${c.instituicao ? ' - ' + c.instituicao : ''}</p>` : ''}
+          </div>
+        `;
+      }).join('');
+    }, 300);
+  }
+
+  // Modais
+  function showModalInfo(type) {
+    const info = modalInfos[type];
+    document.getElementById('modalInfoContent').innerHTML = `
+      <h2 style="margin-bottom: 20px;">${info.title}</h2>
+      ${info.content}
+    `;
+    showModal('modalInfo');
+  }
+
+  function showModal(id) {
+    document.getElementById(id).classList.add('show');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeModal(id) {
+    document.getElementById(id).classList.remove('show');
+    document.body.style.overflow = '';
+  }
+
+  // Toast
+  function showToast(message, type = 'success') {
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.innerHTML = `
+      <span>${type === 'success' ? '✓' : '✕'}</span>
+      <span>${message}</span>
+    `;
+    document.getElementById('toastContainer').appendChild(toast);
+
+    setTimeout(() => {
+      toast.style.animation = 'fadeIn 0.3s ease reverse';
+      setTimeout(() => toast.remove(), 300);
+    }, 3000);
+  }
+
+  // Ripple effect
+  function createRipple(e) {
+    const btn = e.currentTarget;
+    const ripple = document.createElement('span');
+    ripple.className = 'ripple';
+    const rect = btn.getBoundingClientRect();
+    const size = Math.max(rect.width, rect.height);
+    ripple.style.width = ripple.style.height = size + 'px';
+    ripple.style.left = (e.clientX - rect.left - size / 2) + 'px';
+    ripple.style.top = (e.clientY - rect.top - size / 2) + 'px';
+    btn.appendChild(ripple);
+    setTimeout(() => ripple.remove(), 600);
+  }
+
+  // Fechar modal ao clicar fora
+  document.querySelectorAll('.modal').forEach(modal => {
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        modal.classList.remove('show');
+        document.body.style.overflow = '';
+      }
+    });
+  });
+</script>
+
+</body>
+</html>
+Command Palette
+Search for a command to run...
+
+
 
