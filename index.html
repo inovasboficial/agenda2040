@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 
-<head>
+<head>async function
     <!-- Playables SDK -->
     <script>// Playables SDK v1.0.0
         // Game lifecycle bridge: rAF-based game-ready detection + event communication
@@ -731,36 +731,39 @@
         }
 
         async function carregarStats() {
-            try {
-                const res = await fetch(GAS_URL + '?v=' + Date.now(), { cache: 'no-store' });
-                const data = await res.json();
-
-                animateCount(document.getElementById('total-contribuicoes'), data.total || 0);
-                document.getElementById('t-problema').textContent = data.porTipo?.Problema || 0;
-                document.getElementById('t-ideia').textContent = data.porTipo?.Ideia || 0;
-                document.getElementById('t-oportunidade').textContent = data.porTipo?.Oportunidade || 0;
-                document.getElementById('mini-problema').textContent = data.porTipo?.Problema || 0;
-                document.getElementById('mini-ideia').textContent = data.porTipo?.Ideia || 0;
-                document.getElementById('mini-oportunidade').textContent = data.porTipo?.Oportunidade || 0;
-
-                const total = Math.max(data.total, 1);
-                eixos.forEach((eixo, i) => {
-                    const val = data.porEixo?.[eixo.key] || 0;
-                    animateCount(document.getElementById('count-' + i), val);
-                    const bar = document.querySelector('[data-bar="' + i + '"]');
-                    if (bar) setTimeout(() => bar.style.width = ((val / total) * 100) + '%', 200);
-                });
-
-                document.getElementById('ultima-contrib').textContent = data.total > 0 ? 'Nova contribuição registrada no sistema.' : 'Seja o primeiro a contribuir!';
-            } catch (err) {
-                console.log('Stats offline, usando demo');
-                // DEMO
-                animateCount(document.getElementById('total-contribuicoes'), 127);
-                document.getElementById('t-problema').textContent = 54;
-                document.getElementById('t-ideia').textContent = 48;
-                document.getElementById('t-oportunidade').textContent = 25;
-                [38, 22, 31, 19, 14, 3].forEach((v, i) => { animateCount(document.getElementById('count-' + i), v); document.querySelector('[data-bar="' + i + '"]').style.width = (v / 127 * 100) + '%'; });
-            }
+          try {
+            const res = await fetch(GAS_URL + '?action=stats&v=' + Date.now());
+            if (!res.ok) throw new Error('Erro HTTP ' + res.status);
+            const data = await res.json();
+        
+            // Total e tipos
+            animateCount(document.getElementById('total-contribuicoes'), data.total || 0);
+            document.getElementById('t-problema').textContent = data.porTipo?.Problema || 0;
+            document.getElementById('t-ideia').textContent = data.porTipo?.Ideia || 0;
+            document.getElementById('t-oportunidade').textContent = data.porTipo?.Oportunidade || 0;
+        
+            // Eixos - usa dados REAIS da planilha
+            const total = Math.max(data.total || 1, 1);
+            eixos.forEach((eixo, i) => {
+              const val = data.porEixo?.[eixo.key] || 0;
+              animateCount(document.getElementById('count-' + i), val);
+              const bar = document.querySelector('[data-bar="' + i + '"]');
+              if (bar) setTimeout(() => bar.style.width = ((val / total) * 100) + '%', 200);
+            });
+        
+          } catch (err) {
+            console.error('Falha ao buscar planilha:', err);
+            // SEM DADOS FICTÍCIOS - mostra zeros
+            animateCount(document.getElementById('total-contribuicoes'), 0);
+            document.getElementById('t-problema').textContent = 0;
+            document.getElementById('t-ideia').textContent = 0;
+            document.getElementById('t-oportunidade').textContent = 0;
+            eixos.forEach((_, i) => {
+              animateCount(document.getElementById('count-' + i), 0);
+              const bar = document.querySelector('[data-bar="' + i + '"]');
+              if (bar) bar.style.width = '0%';
+            });
+          }
         }
         carregarStats();
         setInterval(carregarStats, 30000);
