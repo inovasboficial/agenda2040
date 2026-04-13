@@ -1,256 +1,50 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
-<head>async function
-    <!-- Playables SDK -->
-    <script>// Playables SDK v1.0.0
-        // Game lifecycle bridge: rAF-based game-ready detection + event communication
-        (function () {
-            'use strict';
-
-            // Idempotency: skip if already initialized (e.g., server-side injection
-            // followed by client-side inject-javascript via the Bloks webview component).
-            if (window.playablesSDK) return;
-
-            var HANDLER_NAME = 'playablesGameEventHandler';
-            var ANDROID_BRIDGE_NAME = '_MetaPlayablesBridge';
-            var RAF_FRAME_THRESHOLD = 3;
-
-            var gameReadySent = false;
-            var firstInteractionSent = false;
-            var errorSent = false;
-            var frameCount = 0;
-            var originalRAF = window.requestAnimationFrame;
-
-            // --- Transport Layer ---
-
-            function hasIOSBridge() {
-                return !!(window.webkit &&
-                    window.webkit.messageHandlers &&
-                    window.webkit.messageHandlers[HANDLER_NAME]);
-            }
-
-            function hasAndroidBridge() {
-                return !!(window[ANDROID_BRIDGE_NAME] &&
-                    typeof window[ANDROID_BRIDGE_NAME].postEvent === 'function');
-            }
-
-            function isInIframe() {
-                return !!(window.parent && window.parent !== window);
-            }
-
-            function sendEvent(eventName, payload) {
-                var message = {
-                    type: eventName,
-                    payload: payload || {},
-                    timestamp: Date.now()
-                };
-
-                if (hasIOSBridge()) {
-                    try {
-                        window.webkit.messageHandlers[HANDLER_NAME].postMessage(message);
-                    } catch (e) { /* ignore */ }
-                    return;
-                }
-
-                if (hasAndroidBridge()) {
-                    try {
-                        var p = payload || {};
-                        p.__secureToken = window.__fbAndroidBridgeAuthToken || '';
-                        window[ANDROID_BRIDGE_NAME].postEvent(
-                            eventName,
-                            JSON.stringify(p)
-                        );
-                    } catch (e) { /* ignore */ }
-                    return;
-                }
-
-                if (isInIframe()) {
-                    try {
-                        window.parent.postMessage(message, '*');
-                    } catch (e) { /* ignore */ }
-                    return;
-                }
-            }
-
-            // --- rAF Game-Ready Detection ---
-
-            function onFrame() {
-                if (gameReadySent) return;
-
-                frameCount++;
-                if (frameCount >= RAF_FRAME_THRESHOLD) {
-                    gameReadySent = true;
-                    sendEvent('game_ready', {
-                        frame_count: frameCount,
-                        detected_at: Date.now()
-                    });
-                    return;
-                }
-
-                originalRAF.call(window, onFrame);
-            }
-
-            if (originalRAF) {
-                window.requestAnimationFrame = function (callback) {
-                    if (!gameReadySent) {
-                        return originalRAF.call(window, function (timestamp) {
-                            frameCount++;
-                            if (frameCount >= RAF_FRAME_THRESHOLD && !gameReadySent) {
-                                gameReadySent = true;
-                                sendEvent('game_ready', {
-                                    frame_count: frameCount,
-                                    detected_at: Date.now()
-                                });
-                            }
-                            callback(timestamp);
-                        });
-                    }
-                    return originalRAF.call(window, callback);
-                };
-            }
-
-            // --- First User Interaction Detection ---
-
-            function setupFirstInteractionDetection() {
-                var events = ['touchstart', 'mousedown', 'keydown'];
-
-                function onFirstInteraction() {
-                    if (firstInteractionSent) return;
-                    firstInteractionSent = true;
-                    sendEvent('user_interaction_start', null);
-
-                    for (var i = 0; i < events.length; i++) {
-                        document.removeEventListener(events[i], onFirstInteraction, true);
-                    }
-                }
-
-                for (var i = 0; i < events.length; i++) {
-                    document.addEventListener(events[i], onFirstInteraction, true);
-                }
-            }
-
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', setupFirstInteractionDetection);
-            } else {
-                setupFirstInteractionDetection();
-            }
-
-            // --- Auto Error Capture ---
-
-            window.addEventListener('error', function (event) {
-                if (errorSent) return;
-                errorSent = true;
-                sendEvent('error', {
-                    message: event.message || 'Unknown error',
-                    source: event.filename || '',
-                    lineno: event.lineno || 0,
-                    colno: event.colno || 0,
-                    auto_captured: true
-                });
-            });
-
-            window.addEventListener('unhandledrejection', function (event) {
-                if (errorSent) return;
-                errorSent = true;
-                var reason = event.reason;
-                sendEvent('error', {
-                    message: (reason instanceof Error) ? reason.message : String(reason),
-                    type: 'unhandled_promise_rejection',
-                    auto_captured: true
-                });
-            });
-
-            // --- Public API ---
-
-            window.playablesSDK = {
-                complete: function (score) {
-                    sendEvent('game_ended', {
-                        score: score,
-                        completed: true
-                    });
-                },
-
-                error: function (message) {
-                    if (errorSent) return;
-                    errorSent = true;
-                    sendEvent('error', {
-                        message: message || 'Unknown error',
-                        auto_captured: false
-                    });
-                },
-
-                sendEvent: function (eventName, payload) {
-                    if (!eventName || typeof eventName !== 'string') return;
-                    sendEvent(eventName, payload);
-                }
-            };
-
-            // Kick off rAF detection in case no game code calls rAF immediately
-            if (originalRAF) {
-                originalRAF.call(window, onFrame);
-            }
-        })();</script>
-    <script>window.Intl = window.Intl || {}; Intl.t = function (s) { return (Intl._locale && Intl._locale[s]) || s; };</script>
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Observatório Agenda 2040 – São Borja</title>
 
     <!-- Playables SDK -->
-    <script>
-        window.playablesAsyncInit = function () {
-            if (window.Playables) Playables.init({ gameId: 'observatorio-agenda-2040-sb' });
-        };
-    </script>
-    <script async src="https://cdn.playables.com/sdk/v1/playables.js"></script>
+    <script>// Playables SDK v1.0.0
+        (function () { 'use strict'; if (window.playablesSDK) return;
+            var HANDLER_NAME = 'playablesGameEventHandler';
+            var ANDROID_BRIDGE_NAME = '_MetaPlayablesBridge';
+            var RAF_FRAME_THRESHOLD = 3; var gameReadySent = false;
+            var firstInteractionSent = false; var errorSent = false;
+            var frameCount = 0; var originalRAF = window.requestAnimationFrame;
+            function hasIOSBridge() { return!!(window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers[HANDLER_NAME]); }
+            function hasAndroidBridge() { return!!(window[ANDROID_BRIDGE_NAME] && typeof window[ANDROID_BRIDGE_NAME].postEvent === 'function'); }
+            function isInIframe() { return!!(window.parent && window.parent!== window); }
+            function sendEvent(eventName, payload) {
+                var message = { type: eventName, payload: payload || {}, timestamp: Date.now() };
+                if (hasIOSBridge()) { try { window.webkit.messageHandlers[HANDLER_NAME].postMessage(message); } catch (e) {} return; }
+                if (hasAndroidBridge()) { try { var p = payload || {}; p.__secureToken = window.__fbAndroidBridgeAuthToken || ''; window[ANDROID_BRIDGE_NAME].postEvent(eventName, JSON.stringify(p)); } catch (e) {} return; }
+                if (isInIframe()) { try { window.parent.postMessage(message, '*'); } catch (e) {} return; }
+            }
+            function onFrame() { if (gameReadySent) return; frameCount++; if (frameCount >= RAF_FRAME_THRESHOLD) { gameReadySent = true; sendEvent('game_ready', { frame_count: frameCount, detected_at: Date.now() }); return; } originalRAF.call(window, onFrame); }
+            if (originalRAF) { window.requestAnimationFrame = function (callback) { if (!gameReadySent) { return originalRAF.call(window, function (timestamp) { frameCount++; if (frameCount >= RAF_FRAME_THRESHOLD &&!gameReadySent) { gameReadySent = true; sendEvent('game_ready', { frame_count: frameCount, detected_at: Date.now() }); } callback(timestamp); }); } return originalRAF.call(window, callback); }; }
+            function setupFirstInteractionDetection() { var events = ['touchstart', 'mousedown', 'keydown']; function onFirstInteraction() { if (firstInteractionSent) return; firstInteractionSent = true; sendEvent('user_interaction_start', null); for (var i = 0; i < events.length; i++) { document.removeEventListener(events[i], onFirstInteraction, true); } } for (var i = 0; i < events.length; i++) { document.addEventListener(events[i], onFirstInteraction, true); } }
+            if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', setupFirstInteractionDetection); } else { setupFirstInteractionDetection(); }
+            window.addEventListener('error', function (event) { if (errorSent) return; errorSent = true; sendEvent('error', { message: event.message || 'Unknown error', source: event.filename || '', lineno: event.lineno || 0, colno: event.colno || 0, auto_captured: true }); });
+            window.addEventListener('unhandledrejection', function (event) { if (errorSent) return; errorSent = true; var reason = event.reason; sendEvent('error', { message: (reason instanceof Error)? reason.message : String(reason), type: 'unhandled_promise_rejection', auto_captured: true }); });
+            window.playablesSDK = { complete: function (score) { sendEvent('game_ended', { score: score, completed: true }); }, error: function (message) { if (errorSent) return; errorSent = true; sendEvent('error', { message: message || 'Unknown error', auto_captured: false }); }, sendEvent: function (eventName, payload) { if (!eventName || typeof eventName!== 'string') return; sendEvent(eventName, payload); } };
+            if (originalRAF) { originalRAF.call(window, onFrame); }
+        })();</script>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700;800&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
-
-    <style>
-        :root {
-            --verde: #2E7D32;
-        }
-
-        html {
-            scroll-behavior: smooth;
-        }
-
-        body {
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
-        }
-
-        h1,
-        h2,
-        h3 {
-            font-family: 'Poppins', sans-serif;
-        }
-
-        .glass {
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-        }
-    </style>
+    <style>:root{--verde:#2E7D32}html{scroll-behavior:smooth}body{font-family:'Inter',system-ui,-apple-system,sans-serif}h1,h2,h3{font-family:'Poppins',sans-serif}.glass{backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}</style>
 </head>
-
 <body class="bg-[#f7f9fc] text-slate-800 antialiased">
-
-    <!-- HEADER BRANCO -->
     <header class="fixed top-0 w-full z-40 bg-white/90 glass border-b border-slate-200/60">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-[68px] flex items-center justify-between">
             <a href="#" class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-[#2E7D32] grid place-items-center shadow-md shadow-green-900/20">
-                    <span class="text-white font-bold">SB</span>
-                </div>
-                <div>
-                    <p class="font-semibold leading-none text-slate-900">Observatório</p>
-                    <p class="text-[11px] text-slate-500 tracking-wide">AGENDA 2040 • SÃO BORJA</p>
-                </div>
+                <div class="w-10 h-10 rounded-xl bg-[#2E7D32] grid place-items-center shadow-md shadow-green-900/20"><span class="text-white font-bold">SB</span></div>
+                <div><p class="font-semibold leading-none text-slate-900">Observatório</p><p class="text-[11px] text-slate-500 tracking-wide">AGENDA 2040 • SÃO BORJA</p></div>
             </a>
             <nav class="hidden md:flex items-center gap-7 text-sm font-medium text-slate-600">
                 <a href="#sobre" class="hover:text-[#2E7D32] transition">Sobre</a>
@@ -258,457 +52,74 @@
                 <a href="#eixos" class="hover:text-[#2E7D32] transition">Eixos</a>
                 <a href="#contribuir" class="hover:text-[#2E7D32] transition">Participar</a>
             </nav>
-            <button onclick="abrirRestrito()"
-                class="hidden sm:inline-flex items-center gap-2 text-sm px-4 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 transition">
-                <i data-lucide="lock" class="w-3.5 h-3.5"></i> Área restrita
-            </button>
         </div>
     </header>
 
     <main>
-        <!-- HERO -->
         <section class="relative pt-32 pb-16 overflow-hidden" id="sobre">
-            <div class="absolute inset-0 -z-10">
-                <div class="absolute inset-0 bg-gradient-to-b from-green-50 via-white to-[#f7f9fc]"></div>
-                <div class="absolute -top-32 -right-32 w-96 h-96 bg-green-200/30 rounded-full blur-3xl"></div>
-            </div>
+            <div class="absolute inset-0 -z-10"><div class="absolute inset-0 bg-gradient-to-b from-green-50 via-white to-[#f7f9fc]"></div><div class="absolute -top-32 -right-32 w-96 h-96 bg-green-200/30 rounded-full blur-3xl"></div></div>
             <div class="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-12 items-center">
                 <div>
-                    <div
-                        class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-100 text-green-800 text-xs font-semibold border border-green-200">
-                        <span class="w-2 h-2 rounded-full bg-[#2E7D32] animate-pulse"></span>
-                        PLATAFORMA OFICIAL DE PARTICIPAÇÃO
-                    </div>
-                    <h1
-                        class="text-[42px] md:text-5xl lg:text-[56px] font-extrabold leading-[1.05] tracking-tight mt-5 text-slate-900">
-                        Construa o futuro de <span class="text-[#2E7D32]">São Borja</span> conosco
-                    </h1>
-                    <p class="mt-5 text-lg text-slate-600 max-w-xl leading-relaxed">
-                        O Observatório Agenda 2040 consolida contribuições da sociedade para planejar a cidade que
-                        queremos. Registre problemas, ideias e oportunidades nos 5 eixos estratégicos.
-                    </p>
-                    <div class="mt-8 flex flex-wrap gap-3">
-                        <a href="#contribuir"
-                            class="px-6 py-3.5 bg-[#2E7D32] text-white rounded-xl font-semibold shadow-lg shadow-green-900/20 hover:bg-green-800 transition flex items-center gap-2">
-                            <i data-lucide="megaphone" class="w-4 h-4"></i> Contribuir agora
-                        </a>
-                        <a href="#dados"
-                            class="px-6 py-3.5 bg-white border border-slate-200 rounded-xl font-semibold hover:bg-slate-50 transition">Ver
-                            dados</a>
-                    </div>
-                    <div class="mt-8 flex items-center gap-6 text-xs text-slate-500">
-                        <div class="flex items-center gap-1.5"><i data-lucide="shield-check"
-                                class="w-4 h-4 text-[#2E7D32]"></i> LGPD</div>
-                        <div class="flex items-center gap-1.5"><i data-lucide="eye" class="w-4 h-4 text-[#2E7D32]"></i>
-                            Dados públicos</div>
-                        <div class="flex items-center gap-1.5"><i data-lucide="clock"
-                                class="w-4 h-4 text-[#2E7D32]"></i> 2 minutos</div>
-                    </div>
-                    
-                    
-                </div>
-        </section>
-
-        <!-- CONTRIBUIÇÕES RECEBIDAS -->
-        <section id="dados" class="py-20 bg-white border-y border-slate-100">
-            <div class="max-w-7xl mx-auto px-6">
-                <div class="text-center max-w-2xl mx-auto">
-                    <h2 class="text-3xl md:text-4xl font-bold text-slate-900">Contribuições recebidas</h2>
-                    <p class="text-slate-600 mt-3">Transparência total. Os números abaixo são atualizados
-                        automaticamente a cada nova contribuição enviada pela comunidade.</p>
-                </div>
-
-                <!-- CARD PRINCIPAL -->
-                <div class="mt-12 max-w-2xl mx-auto">
-                    <div
-                        class="relative bg-gradient-to-br from-[#2E7D32] to-green-700 rounded-[24px] p-[1px] shadow-xl shadow-green-900/20">
-                        <div class="bg-white/0 rounded-[23px] overflow-hidden">
-                            <div class="bg-gradient-to-br from-[#2E7D32] to-green-800 px-8 py-10 text-center relative">
-                                <div class="absolute inset-0 opacity-10"
-                                    style="background-image:radial-gradient(white 1px, transparent 1px); background-size: 20px 20px;">
-                                </div>
-                                <p class="text-green-100 uppercase tracking-[0.2em] text-xs font-semibold">Total geral
-                                </p>
-                                <p id="total-contribuicoes"
-                                    class="text-7xl md:text-8xl font-extrabold text-white mt-3 tracking-tight">0</p>
-                                <p class="text-green-100 mt-2">contribuições da comunidade são-borjense</p>
-                                <div class="flex flex-wrap justify-center gap-2.5 mt-6">
-                                    <div
-                                        class="px-4 py-2 rounded-xl bg-white/15 backdrop-blur text-white text-sm font-medium border border-white/20">
-                                        <span id="t-problema" class="font-bold">0</span> Problemas
-                                    </div>
-                                    <div
-                                        class="px-4 py-2 rounded-xl bg-white/15 backdrop-blur text-white text-sm font-medium border border-white/20">
-                                        <span id="t-ideia" class="font-bold">0</span> Ideias
-                                    </div>
-                                    <div
-                                        class="px-4 py-2 rounded-xl bg-white/15 backdrop-blur text-white text-sm font-medium border border-white/20">
-                                        <span id="t-oportunidade" class="font-bold">0</span> Oportunidades
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- GRID 2x3 -->
-                <div class="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 max-w-6xl mx-auto">
-
-                    <!-- EIXO I -->
-                    <div
-                        class="group bg-white rounded-2xl p-6 shadow-sm border border-slate-100 hover:shadow-md hover:-translate-y-0.5 transition-all">
-                        <div class="flex items-start justify-between">
-                            <div
-                                class="w-12 h-12 rounded-2xl bg-green-50 text-[#2E7D32] grid place-items-center group-hover:scale-110 transition">
-                                <i data-lucide="landmark" class="w-5.5 h-5.5"></i>
-                            </div>
-                            <span
-                                class="text-[11px] font-medium px-2.5 py-1 rounded-full bg-slate-100 text-slate-600">EIXO
-                                I</span>
-                        </div>
-                        <h3 class="mt-4 font-semibold text-slate-800 leading-snug line-clamp-2 min-h-[44px]">
-                            Desenvolvimento econômico, governança, transparência e inovação</h3>
-                        <p id="count-0" class="text-4xl font-extrabold mt-3 text-slate-900">0</p>
-                        <div class="h-2 bg-slate-100 rounded-full mt-4 overflow-hidden">
-                            <div data-bar="0"
-                                class="h-full bg-[#2E7D32] w-0 rounded-full transition-all duration-1000 ease-out">
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- EIXO II -->
-                    <div
-                        class="group bg-white rounded-2xl p-6 shadow-sm border border-slate-100 hover:shadow-md hover:-translate-y-0.5 transition-all">
-                        <div class="flex items-start justify-between">
-                            <div
-                                class="w-12 h-12 rounded-2xl bg-green-50 text-[#2E7D32] grid place-items-center group-hover:scale-110 transition">
-                                <i data-lucide="leaf" class="w-5.5 h-5.5"></i>
-                            </div>
-                            <span
-                                class="text-[11px] font-medium px-2.5 py-1 rounded-full bg-slate-100 text-slate-600">EIXO
-                                II</span>
-                        </div>
-                        <h3 class="mt-4 font-semibold text-slate-800 leading-snug line-clamp-2 min-h-[44px]">
-                            Sustentabilidade ambiental rural</h3>
-                        <p id="count-1" class="text-4xl font-extrabold mt-3 text-slate-900">0</p>
-                        <div class="h-2 bg-slate-100 rounded-full mt-4 overflow-hidden">
-                            <div data-bar="1"
-                                class="h-full bg-[#2E7D32] w-0 rounded-full transition-all duration-1000 ease-out">
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- EIXO III -->
-                    <div
-                        class="group bg-white rounded-2xl p-6 shadow-sm border border-slate-100 hover:shadow-md hover:-translate-y-0.5 transition-all">
-                        <div class="flex items-start justify-between">
-                            <div
-                                class="w-12 h-12 rounded-2xl bg-green-50 text-[#2E7D32] grid place-items-center group-hover:scale-110 transition">
-                                <i data-lucide="graduation-cap" class="w-5.5 h-5.5"></i>
-                            </div>
-                            <span
-                                class="text-[11px] font-medium px-2.5 py-1 rounded-full bg-slate-100 text-slate-600">EIXO
-                                III</span>
-                        </div>
-                        <h3 class="mt-4 font-semibold text-slate-800 leading-snug line-clamp-2 min-h-[44px]">Educação,
-                            cultura, participação cidadã e identidade local</h3>
-                        <p id="count-2" class="text-4xl font-extrabold mt-3 text-slate-900">0</p>
-                        <div class="h-2 bg-slate-100 rounded-full mt-4 overflow-hidden">
-                            <div data-bar="2"
-                                class="h-full bg-[#2E7D32] w-0 rounded-full transition-all duration-1000 ease-out">
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- EIXO IV -->
-                    <div
-                        class="group bg-white rounded-2xl p-6 shadow-sm border border-slate-100 hover:shadow-md hover:-translate-y-0.5 transition-all">
-                        <div class="flex items-start justify-between">
-                            <div
-                                class="w-12 h-12 rounded-2xl bg-green-50 text-[#2E7D32] grid place-items-center group-hover:scale-110 transition">
-                                <i data-lucide="heart-pulse" class="w-5.5 h-5.5"></i>
-                            </div>
-                            <span
-                                class="text-[11px] font-medium px-2.5 py-1 rounded-full bg-slate-100 text-slate-600">EIXO
-                                IV</span>
-                        </div>
-                        <h3 class="mt-4 font-semibold text-slate-800 leading-snug line-clamp-2 min-h-[44px]">Saúde,
-                            assistência social e inclusão</h3>
-                        <p id="count-3" class="text-4xl font-extrabold mt-3 text-slate-900">0</p>
-                        <div class="h-2 bg-slate-100 rounded-full mt-4 overflow-hidden">
-                            <div data-bar="3"
-                                class="h-full bg-[#2E7D32] w-0 rounded-full transition-all duration-1000 ease-out">
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- EIXO V -->
-                    <div
-                        class="group bg-white rounded-2xl p-6 shadow-sm border border-slate-100 hover:shadow-md hover:-translate-y-0.5 transition-all">
-                        <div class="flex items-start justify-between">
-                            <div
-                                class="w-12 h-12 rounded-2xl bg-green-50 text-[#2E7D32] grid place-items-center group-hover:scale-110 transition">
-                                <i data-lucide="building-2" class="w-5.5 h-5.5"></i>
-                            </div>
-                            <span
-                                class="text-[11px] font-medium px-2.5 py-1 rounded-full bg-slate-100 text-slate-600">EIXO
-                                V</span>
-                        </div>
-                        <h3 class="mt-4 font-semibold text-slate-800 leading-snug line-clamp-2 min-h-[44px]">
-                            Infraestrutura, mobilidade e urbanismo</h3>
-                        <p id="count-4" class="text-4xl font-extrabold mt-3 text-slate-900">0</p>
-                        <div class="h-2 bg-slate-100 rounded-full mt-4 overflow-hidden">
-                            <div data-bar="4"
-                                class="h-full bg-[#2E7D32] w-0 rounded-full transition-all duration-1000 ease-out">
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- OUTROS -->
-                    <div
-                        class="group bg-white rounded-2xl p-6 shadow-sm border border-slate-100 hover:shadow-md hover:-translate-y-0.5 transition-all">
-                        <div class="flex items-start justify-between">
-                            <div
-                                class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-600 grid place-items-center group-hover:scale-110 transition">
-                                <i data-lucide="layers" class="w-5.5 h-5.5"></i>
-                            </div>
-                            <span
-                                class="text-[11px] font-medium px-2.5 py-1 rounded-full bg-slate-100 text-slate-600">OUTROS</span>
-                        </div>
-                        <h3 class="mt-4 font-semibold text-slate-800 leading-snug line-clamp-2 min-h-[44px]">Outros
-                            temas transversais</h3>
-                        <p id="count-5" class="text-4xl font-extrabold mt-3 text-slate-900">0</p>
-                        <div class="h-2 bg-slate-100 rounded-full mt-4 overflow-hidden">
-                            <div data-bar="5"
-                                class="h-full bg-slate-400 w-0 rounded-full transition-all duration-1000 ease-out">
-                            </div>
-                        </div>
-                    </div>
-
+                    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-100 text-green-800 text-xs font-semibold border border-green-200"><span class="w-2 h-2 rounded-full bg-[#2E7D32] animate-pulse"></span>PLATAFORMA OFICIAL DE PARTICIPAÇÃO</div>
+                    <h1 class="text-[42px] md:text-5xl lg:text-[56px] font-extrabold leading-[1.05] tracking-tight mt-5 text-slate-900">Construa o futuro de <span class="text-[#2E7D32]">São Borja</span> conosco</h1>
+                    <p class="mt-5 text-lg text-slate-600 max-w-xl leading-relaxed">O Observatório Agenda 2040 consolida contribuições da sociedade para planejar a cidade que queremos. Registre problemas, ideias e oportunidades nos 5 eixos estratégicos.</p>
+                    <div class="mt-8 flex flex-wrap gap-3"><a href="#contribuir" class="px-6 py-3.5 bg-[#2E7D32] text-white rounded-xl font-semibold shadow-lg shadow-green-900/20 hover:bg-green-800 transition flex items-center gap-2"><i data-lucide="megaphone" class="w-4 h-4"></i> Contribuir agora</a><a href="#dados" class="px-6 py-3.5 bg-white border border-slate-200 rounded-xl font-semibold hover:bg-slate-50 transition">Ver dados</a></div>
                 </div>
             </div>
         </section>
 
-        <!-- FORMULÁRIO COM TRANSCRIÇÃO -->
+        <section id="dados" class="py-20 bg-white border-y border-slate-100">
+            <div class="max-w-7xl mx-auto px-6">
+                <div class="text-center max-w-2xl mx-auto"><h2 class="text-3xl md:text-4xl font-bold text-slate-900">Contribuições recebidas</h2><p class="text-slate-600 mt-3">Transparência total. Os números abaixo são atualizados automaticamente a cada nova contribuição.</p></div>
+                <div class="mt-12 max-w-2xl mx-auto">
+                    <div class="relative bg-gradient-to-br from-[#2E7D32] to-green-700 rounded-[24px] p-[1px] shadow-xl shadow-green-900/20">
+                        <div class="bg-gradient-to-br from-[#2E7D32] to-green-800 px-8 py-10 text-center relative rounded-[23px]">
+                            <p class="text-green-100 uppercase tracking-[0.2em] text-xs font-semibold">Total geral</p>
+                            <p id="total-contribuicoes" class="text-7xl md:text-8xl font-extrabold text-white mt-3 tracking-tight">0</p>
+                            <p class="text-green-100 mt-2">contribuições da comunidade são-borjense</p>
+                            <div class="flex flex-wrap justify-center gap-2.5 mt-6">
+                                <div class="px-4 py-2 rounded-xl bg-white/15 backdrop-blur text-white text-sm font-medium border border-white/20"><span id="t-problema" class="font-bold">0</span> Problemas</div>
+                                <div class="px-4 py-2 rounded-xl bg-white/15 backdrop-blur text-white text-sm font-medium border border-white/20"><span id="t-ideia" class="font-bold">0</span> Ideias</div>
+                                <div class="px-4 py-2 rounded-xl bg-white/15 backdrop-blur text-white text-sm font-medium border border-white/20"><span id="t-oportunidade" class="font-bold">0</span> Oportunidades</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 max-w-6xl mx-auto">
+                    <div class="group bg-white rounded-2xl p-6 shadow-sm border border-slate-100 hover:shadow-md hover:-translate-y-0.5 transition-all"><div class="flex items-start justify-between"><div class="w-12 h-12 rounded-2xl bg-green-50 text-[#2E7D32] grid place-items-center"><i data-lucide="landmark" class="w-5.5 h-5.5"></i></div><span class="text-[11px] font-medium px-2.5 py-1 rounded-full bg-slate-100 text-slate-600">EIXO I</span></div><h3 class="mt-4 font-semibold text-slate-800 leading-snug min-h-[44px]">Desenvolvimento econômico, governança, transparência e inovação</h3><p id="count-0" class="text-4xl font-extrabold mt-3 text-slate-900">0</p><div class="h-2 bg-slate-100 rounded-full mt-4 overflow-hidden"><div data-bar="0" class="h-full bg-[#2E7D32] w-0 rounded-full transition-all duration-1000"></div></div></div>
+                    <div class="group bg-white rounded-2xl p-6 shadow-sm border border-slate-100 hover:shadow-md hover:-translate-y-0.5 transition-all"><div class="flex items-start justify-between"><div class="w-12 h-12 rounded-2xl bg-green-50 text-[#2E7D32] grid place-items-center"><i data-lucide="leaf" class="w-5.5 h-5.5"></i></div><span class="text-[11px] font-medium px-2.5 py-1 rounded-full bg-slate-100 text-slate-600">EIXO II</span></div><h3 class="mt-4 font-semibold text-slate-800 leading-snug min-h-[44px]">Sustentabilidade ambiental rural</h3><p id="count-1" class="text-4xl font-extrabold mt-3 text-slate-900">0</p><div class="h-2 bg-slate-100 rounded-full mt-4 overflow-hidden"><div data-bar="1" class="h-full bg-[#2E7D32] w-0 rounded-full transition-all duration-1000"></div></div></div>
+                    <div class="group bg-white rounded-2xl p-6 shadow-sm border border-slate-100 hover:shadow-md hover:-translate-y-0.5 transition-all"><div class="flex items-start justify-between"><div class="w-12 h-12 rounded-2xl bg-green-50 text-[#2E7D32] grid place-items-center"><i data-lucide="graduation-cap" class="w-5.5 h-5.5"></i></div><span class="text-[11px] font-medium px-2.5 py-1 rounded-full bg-slate-100 text-slate-600">EIXO III</span></div><h3 class="mt-4 font-semibold text-slate-800 leading-snug min-h-[44px]">Educação, cultura, participação cidadã e identidade local</h3><p id="count-2" class="text-4xl font-extrabold mt-3 text-slate-900">0</p><div class="h-2 bg-slate-100 rounded-full mt-4 overflow-hidden"><div data-bar="2" class="h-full bg-[#2E7D32] w-0 rounded-full transition-all duration-1000"></div></div></div>
+                    <div class="group bg-white rounded-2xl p-6 shadow-sm border border-slate-100 hover:shadow-md hover:-translate-y-0.5 transition-all"><div class="flex items-start justify-between"><div class="w-12 h-12 rounded-2xl bg-green-50 text-[#2E7D32] grid place-items-center"><i data-lucide="heart-pulse" class="w-5.5 h-5.5"></i></div><span class="text-[11px] font-medium px-2.5 py-1 rounded-full bg-slate-100 text-slate-600">EIXO IV</span></div><h3 class="mt-4 font-semibold text-slate-800 leading-snug min-h-[44px]">Saúde, assistência social e inclusão</h3><p id="count-3" class="text-4xl font-extrabold mt-3 text-slate-900">0</p><div class="h-2 bg-slate-100 rounded-full mt-4 overflow-hidden"><div data-bar="3" class="h-full bg-[#2E7D32] w-0 rounded-full transition-all duration-1000"></div></div></div>
+                    <div class="group bg-white rounded-2xl p-6 shadow-sm border border-slate-100 hover:shadow-md hover:-translate-y-0.5 transition-all"><div class="flex items-start justify-between"><div class="w-12 h-12 rounded-2xl bg-green-50 text-[#2E7D32] grid place-items-center"><i data-lucide="building-2" class="w-5.5 h-5.5"></i></div><span class="text-[11px] font-medium px-2.5 py-1 rounded-full bg-slate-100 text-slate-600">EIXO V</span></div><h3 class="mt-4 font-semibold text-slate-800 leading-snug min-h-[44px]">Infraestrutura, mobilidade e urbanismo</h3><p id="count-4" class="text-4xl font-extrabold mt-3 text-slate-900">0</p><div class="h-2 bg-slate-100 rounded-full mt-4 overflow-hidden"><div data-bar="4" class="h-full bg-[#2E7D32] w-0 rounded-full transition-all duration-1000"></div></div></div>
+                    <div class="group bg-white rounded-2xl p-6 shadow-sm border border-slate-100 hover:shadow-md hover:-translate-y-0.5 transition-all"><div class="flex items-start justify-between"><div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-600 grid place-items-center"><i data-lucide="layers" class="w-5.5 h-5.5"></i></div><span class="text-[11px] font-medium px-2.5 py-1 rounded-full bg-slate-100 text-slate-600">OUTROS</span></div><h3 class="mt-4 font-semibold text-slate-800 leading-snug min-h-[44px]">Outros temas transversais</h3><p id="count-5" class="text-4xl font-extrabold mt-3 text-slate-900">0</p><div class="h-2 bg-slate-100 rounded-full mt-4 overflow-hidden"><div data-bar="5" class="h-full bg-slate-400 w-0 rounded-full transition-all duration-1000"></div></div></div>
+                </div>
+            </div>
+        </section>
+
         <section id="contribuir" class="py-20">
             <div class="max-w-3xl mx-auto px-6">
-                <div
-                    class="bg-white rounded-[28px] shadow-xl shadow-slate-200/60 border border-slate-100 overflow-hidden">
-                    <div class="px-6 md:px-10 py-8 bg-gradient-to-r from-slate-50 to-white border-b border-slate-100">
-                        <h2 class="text-2xl md:text-3xl font-bold text-slate-900">Envie sua contribuição</h2>
-                        <p class="text-slate-600 mt-1.5">Sua voz constrói a Agenda 2040. Preencha ou fale — a
-                            transcrição é automática.</p>
-                    </div>
-
+                <div class="bg-white rounded-[28px] shadow-xl shadow-slate-200/60 border border-slate-100 overflow-hidden">
+                    <div class="px-6 md:px-10 py-8 bg-gradient-to-r from-slate-50 to-white border-b border-slate-100"><h2 class="text-2xl md:text-3xl font-bold text-slate-900">Envie sua contribuição</h2><p class="text-slate-600 mt-1.5">Sua voz constrói a Agenda 2040. Preencha ou fale — a transcrição é automática.</p></div>
                     <form id="form-contrib" class="px-6 md:px-10 py-8 space-y-6">
-                        <!-- TIPO -->
-                        <div>
-                            <label class="text-sm font-semibold text-slate-800 mb-2 block">1. Que tipo de contribuição?
-                                *</label>
-                            <div class="grid grid-cols-3 gap-2.5">
-                                <label class="cursor-pointer group">
-                                    <input type="radio" name="tipo" value="Problema" required class="sr-only peer">
-                                    <div
-                                        class="p-3.5 rounded-2xl border-2 border-slate-200 text-center font-medium peer-checked:border-red-500 peer-checked:bg-red-50 peer-checked:text-red-700 hover:border-slate-300 transition">
-                                        <i data-lucide="alert-triangle"
-                                            class="w-4 h-4 mx-auto mb-1 opacity-70"></i>Problema
-                                    </div>
-                                </label>
-                                <label class="cursor-pointer group">
-                                    <input type="radio" name="tipo" value="Ideia" class="sr-only peer">
-                                    <div
-                                        class="p-3.5 rounded-2xl border-2 border-slate-200 text-center font-medium peer-checked:border-amber-500 peer-checked:bg-amber-50 peer-checked:text-amber-700 hover:border-slate-300 transition">
-                                        <i data-lucide="lightbulb" class="w-4 h-4 mx-auto mb-1 opacity-70"></i>Ideia
-                                    </div>
-                                </label>
-                                <label class="cursor-pointer group">
-                                    <input type="radio" name="tipo" value="Oportunidade" class="sr-only peer">
-                                    <div
-                                        class="p-3.5 rounded-2xl border-2 border-slate-200 text-center font-medium peer-checked:border-[#2E7D32] peer-checked:bg-green-50 peer-checked:text-green-700 hover:border-slate-300 transition">
-                                        <i data-lucide="trending-up"
-                                            class="w-4 h-4 mx-auto mb-1 opacity-70"></i>Oportunidade
-                                    </div>
-                                </label>
-                            </div>
-                        </div>
-
-                        <!-- CONTEÚDO COM VOZ -->
-                        <div>
-                            <div class="flex items-center justify-between mb-2">
-                                <label class="text-sm font-semibold text-slate-800">2. Descreva com detalhes *</label>
-                                <button type="button" id="btn-voz"
-                                    class="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg bg-slate-900 text-white hover:bg-black transition shadow-sm">
-                                    🎤 Falar em vez de digitar
-                                </button>
-                            </div>
-
-                            <div id="voz-status"
-                                class="hidden mb-3 p-3.5 rounded-xl bg-green-50 border border-green-200 text-green-800 text-sm flex items-center gap-3 animate-in fade-in">
-                                <span class="relative flex h-3 w-3"><span
-                                        class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#2E7D32] opacity-75"></span><span
-                                        class="relative inline-flex rounded-full h-3 w-3 bg-[#2E7D32]"></span></span>
-                                <span class="font-medium">Ouvindo... fale agora</span>
-                                <span class="ml-auto text-xs opacity-70">Português (BR)</span>
-                            </div>
-
-                            <textarea id="conteudo" name="conteudo" required rows="5"
-                                class="w-full rounded-2xl border-slate-300 focus:border-[#2E7D32] focus:ring-4 focus:ring-green-100 p-4 text-[15px] leading-relaxed resize-y shadow-sm"
-                                placeholder="Ex: Na Rua Duque de Caxias, a iluminação pública está apagada há 3 semanas, trazendo insegurança à noite. Sugiro troca por LED..."></textarea>
-                            <p id="voz-aviso"
-                                class="text-xs text-amber-700 mt-2 hidden bg-amber-50 border border-amber-200 rounded-lg p-2.5">
-                                ⚠️ Seu navegador não suporta reconhecimento de voz. Use Chrome ou Edge no
-                                computador/celular.</p>
-                            <p class="text-[12px] text-slate-500 mt-1.5">Dica: seja específico — onde, quando, quem é
-                                afetado e qual sua sugestão.</p>
-                        </div>
-
-                        <!-- EIXO -->
-                        <div>
-                            <label class="text-sm font-semibold text-slate-800 mb-2 block">3. Eixo da Agenda 2040
-                                *</label>
-                            <select name="eixo" required
-                                class="w-full rounded-2xl border-slate-300 focus:border-[#2E7D32] focus:ring-4 focus:ring-green-100 p-3.5 bg-white text-[15px] shadow-sm">
-                                <option value="">Selecione o eixo mais relacionado...</option>
-                                <option value="I Desenvolvimento econômico, governança, transparência inovação">I –
-                                    Desenvolvimento econômico, governança, transparência e inovação</option>
-                                <option value="II Sustentabilidade ambiental rural">II – Sustentabilidade ambiental
-                                    rural</option>
-                                <option value="III Educação, cultura, participação cidadã identidade local">III –
-                                    Educação, cultura, participação cidadã e identidade local</option>
-                                <option value="IV Saúde, assistência social inclusão">IV – Saúde, assistência social e
-                                    inclusão</option>
-                                <option value="V Infraestrutura, mobilidade urbanismo">V – Infraestrutura, mobilidade e
-                                    urbanismo</option>
-                                <option value="V Infraestrutura, mobilidade urbanismo">VI – Outros temas transversais</option>
-                            </select>
-                        </div>
-
-                        <!-- LOCALIZAÇÃO -->
-                        <div>
-                            <label class="text-sm font-semibold text-slate-800 mb-2 block">4. Localização (opcional, mas
-                                ajuda muito)</label>
-                            <div class="flex flex-wrap items-center gap-3">
-                                <button type="button" id="btn-gps"
-                                    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm font-medium shadow-sm transition">
-                                    <i data-lucide="map-pin" class="w-4 h-4 text-[#2E7D32]"></i> Usar minha localização
-                                </button>
-                                <input type="hidden" name="latitude" id="latitude">
-                                <input type="hidden" name="longitude" id="longitude">
-                                <span id="gps-status" class="text-xs text-slate-500"></span>
-                            </div>
-                        </div>
-
-                        <!-- IDENTIFICAÇÃO -->
-                        <div class="grid md:grid-cols-2 gap-4">
-                            <div>
-                                <label class="text-sm font-medium text-slate-700">Nome (opcional)</label>
-                                <input name="nome"
-                                    class="mt-1.5 w-full rounded-xl border-slate-300 focus:border-[#2E7D32] focus:ring-green-100 p-2.5 text-sm"
-                                    placeholder="Seu nome">
-                            </div>
-                            <div>
-                                <label class="text-sm font-medium text-slate-700">Instituição (opcional)</label>
-                                <input name="instituicao"
-                                    class="mt-1.5 w-full rounded-xl border-slate-300 focus:border-[#2E7D32] focus:ring-green-100 p-2.5 text-sm"
-                                    placeholder="Escola, empresa, coletivo...">
-                            </div>
-                        </div>
-
-                        <!-- LGPD -->
-                        <label
-                            class="flex items-start gap-3 p-4 rounded-2xl bg-slate-50 border border-slate-200 cursor-pointer hover:bg-slate-100/70 transition">
-                            <input type="checkbox" name="lgpd" required
-                                class="mt-0.5 w-4 h-4 rounded border-slate-300 text-[#2E7D32] focus:ring-[#2E7D32]">
-                            <span class="text-xs leading-relaxed text-slate-600">Concordo com o tratamento dos meus
-                                dados pessoais para fins de participação pública na construção da Agenda 2040, conforme
-                                a LGPD (Lei 13.709/2018). Estou ciente de que minha contribuição será publicada de forma
-                                anonimizada no painel do Observatório.</span>
-                        </label>
-
-                        <button id="btn-enviar" type="submit"
-                            class="w-full py-4 rounded-2xl bg-[#2E7D32] text-white font-semibold text-[15px] hover:bg-green-800 active:scale-[0.99] transition shadow-lg shadow-green-900/20 flex items-center justify-center gap-2">
-                            <i data-lucide="send" class="w-4 h-4"></i> Enviar contribuição
-                        </button>
+                        <div><label class="text-sm font-semibold text-slate-800 mb-2 block">1. Que tipo de contribuição? *</label><div class="grid grid-cols-3 gap-2.5"><label class="cursor-pointer"><input type="radio" name="tipo" value="Problema" required class="sr-only peer"><div class="p-3.5 rounded-2xl border-2 border-slate-200 text-center font-medium peer-checked:border-red-500 peer-checked:bg-red-50 peer-checked:text-red-700 hover:border-slate-300 transition"><i data-lucide="alert-triangle" class="w-4 h-4 mx-auto mb-1 opacity-70"></i>Problema</div></label><label class="cursor-pointer"><input type="radio" name="tipo" value="Ideia" class="sr-only peer"><div class="p-3.5 rounded-2xl border-2 border-slate-200 text-center font-medium peer-checked:border-amber-500 peer-checked:bg-amber-50 peer-checked:text-amber-700 hover:border-slate-300 transition"><i data-lucide="lightbulb" class="w-4 h-4 mx-auto mb-1 opacity-70"></i>Ideia</div></label><label class="cursor-pointer"><input type="radio" name="tipo" value="Oportunidade" class="sr-only peer"><div class="p-3.5 rounded-2xl border-2 border-slate-200 text-center font-medium peer-checked:border-[#2E7D32] peer-checked:bg-green-50 peer-checked:text-green-700 hover:border-slate-300 transition"><i data-lucide="trending-up" class="w-4 h-4 mx-auto mb-1 opacity-70"></i>Oportunidade</div></label></div></div>
+                        <div><div class="flex items-center justify-between mb-2"><label class="text-sm font-semibold text-slate-800">2. Descreva com detalhes *</label><button type="button" id="btn-voz" class="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg bg-slate-900 text-white hover:bg-black transition shadow-sm">🎤 Falar em vez de digitar</button></div><div id="voz-status" class="hidden mb-3 p-3.5 rounded-xl bg-green-50 border border-green-200 text-green-800 text-sm flex items-center gap-3"><span class="relative flex h-3 w-3"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#2E7D32] opacity-75"></span><span class="relative inline-flex rounded-full h-3 w-3 bg-[#2E7D32]"></span></span><span class="font-medium">Ouvindo... fale agora</span><span class="ml-auto text-xs opacity-70">Português (BR)</span></div><textarea id="conteudo" name="conteudo" required rows="5" class="w-full rounded-2xl border-slate-300 focus:border-[#2E7D32] focus:ring-4 focus:ring-green-100 p-4 text-[15px] leading-relaxed resize-y shadow-sm" placeholder="Ex: Na Rua Duque de Caxias, a iluminação pública está apagada há 3 semanas..."></textarea><p id="voz-aviso" class="text-xs text-amber-700 mt-2 hidden bg-amber-50 border border-amber-200 rounded-lg p-2.5">⚠️ Seu navegador não suporta reconhecimento de voz. Use Chrome ou Edge.</p></div>
+                        <div><label class="text-sm font-semibold text-slate-800 mb-2 block">3. Eixo da Agenda 2040 *</label><select name="eixo" required class="w-full rounded-2xl border-slate-300 focus:border-[#2E7D32] focus:ring-4 focus:ring-green-100 p-3.5 bg-white text-[15px] shadow-sm"><option value="">Selecione o eixo...</option><option value="I Desenvolvimento econômico, governança, transparência inovação">I – Desenvolvimento econômico, governança, transparência e inovação</option><option value="II Sustentabilidade ambiental rural">II – Sustentabilidade ambiental rural</option><option value="III Educação, cultura, participação cidadã identidade local">III – Educação, cultura, participação cidadã e identidade local</option><option value="IV Saúde, assistência social inclusão">IV – Saúde, assistência social e inclusão</option><option value="V Infraestrutura, mobilidade urbanismo">V – Infraestrutura, mobilidade e urbanismo</option><option value="Outros">VI – Outros temas transversais</option></select></div>
+                        <div><label class="text-sm font-semibold text-slate-800 mb-2 block">4. Localização (opcional)</label><div class="flex flex-wrap items-center gap-3"><button type="button" id="btn-gps" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm font-medium shadow-sm transition"><i data-lucide="map-pin" class="w-4 h-4 text-[#2E7D32]"></i> Usar minha localização</button><input type="hidden" name="latitude" id="latitude"><input type="hidden" name="longitude" id="longitude"><span id="gps-status" class="text-xs text-slate-500"></span></div></div>
+                        <div class="grid md:grid-cols-2 gap-4"><div><label class="text-sm font-medium text-slate-700">Nome (opcional)</label><input name="nome" class="mt-1.5 w-full rounded-xl border-slate-300 focus:border-[#2E7D32] focus:ring-green-100 p-2.5 text-sm" placeholder="Seu nome"></div><div><label class="text-sm font-medium text-slate-700">Instituição (opcional)</label><input name="instituicao" class="mt-1.5 w-full rounded-xl border-slate-300 focus:border-[#2E7D32] focus:ring-green-100 p-2.5 text-sm" placeholder="Escola, empresa..."></div></div>
+                        <label class="flex items-start gap-3 p-4 rounded-2xl bg-slate-50 border border-slate-200 cursor-pointer hover:bg-slate-100/70 transition"><input type="checkbox" name="lgpd" required class="mt-0.5 w-4 h-4 rounded border-slate-300 text-[#2E7D32] focus:ring-[#2E7D32]"><span class="text-xs leading-relaxed text-slate-600">Concordo com o tratamento dos meus dados pessoais para fins de participação pública na construção da Agenda 2040, conforme a LGPD (Lei 13.709/2018).</span></label>
+                        <button id="btn-enviar" type="submit" class="w-full py-4 rounded-2xl bg-[#2E7D32] text-white font-semibold text-[15px] hover:bg-green-800 active:scale-[0.99] transition shadow-lg shadow-green-900/20 flex items-center justify-center gap-2"><i data-lucide="send" class="w-4 h-4"></i> Enviar contribuição</button>
                         <p id="form-msg" class="text-center text-sm hidden p-3 rounded-xl"></p>
                     </form>
                 </div>
             </div>
         </section>
-
-        <!-- EIXOS -->
-        <section id="eixos" class="py-16 bg-white border-t border-slate-100">
-            <div class="max-w-7xl mx-auto px-6">
-                <h2 class="text-2xl font-bold text-center">Os 5 Eixos da Agenda 2040</h2>
-                <div class="mt-8 grid md:grid-cols-5 gap-4 text-sm">
-                    <div class="p-4 rounded-2xl border bg-slate-50">
-                        <p class="font-semibold text-[#2E7D32]">I</p>
-                        <p class="text-slate-700 mt-1">Desenvolvimento econômico e governança</p>
-                    </div>
-                    <div class="p-4 rounded-2xl border bg-slate-50">
-                        <p class="font-semibold text-[#2E7D32]">II</p>
-                        <p class="text-slate-700 mt-1">Sustentabilidade ambiental rural</p>
-                    </div>
-                    <div class="p-4 rounded-2xl border bg-slate-50">
-                        <p class="font-semibold text-[#2E7D32]">III</p>
-                        <p class="text-slate-700 mt-1">Educação, cultura e cidadania</p>
-                    </div>
-                    <div class="p-4 rounded-2xl border bg-slate-50">
-                        <p class="font-semibold text-[#2E7D32]">IV</p>
-                        <p class="text-slate-700 mt-1">Saúde e assistência social</p>
-                    </div>
-                    <div class="p-4 rounded-2xl border bg-slate-50">
-                        <p class="font-semibold text-[#2E7D32]">V</p>
-                        <p class="text-slate-700 mt-1">Infraestrutura e mobilidade</p>
-                    </div>
-      
-                </div>
-            </div>
-        </section>
     </main>
 
-    <!-- RODAPÉ COMPACTO -->
-    <footer class="bg-slate-950 text-slate-400 border-t border-slate-800">
-        <div class="max-w-7xl mx-auto px-6 py-8 flex flex-col md:flex-row items-center justify-between gap-4">
-            <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-lg bg-white/10 grid place-items-center"><span
-                        class="text-white font-bold text-xs">SB</span></div>
-                <div>
-                    <p class="text-white text-sm font-medium leading-none">Prefeitura de São Borja</p>
-                    <p class="text-[11px] mt-1">Observatório Agenda 2040 © 2025 — Dados abertos</p>
-                </div>
-                <div class="flex items-center gap-5 text-xs">
-                    <a href="#" class="hover:text-white transition">Política de Privacidade (LGPD)</a>
-                    <a href="#" class="hover:text-white transition">Transparência</a>
-                    <button onclick="abrirRestrito()" class="hover:text-white transition">Gestores</button>
-                </div>
-            </div>
-    </footer>
-
-    <!-- MODAL ÁREA RESTRITA -->
-    <div id="modal-restrito"
-        class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden items-center justify-center z-[100] p-4">
-        <div class="bg-white rounded-[24px] p-7 max-w-sm w-full shadow-2xl">
-            <div class="w-12 h-12 rounded-2xl bg-slate-900 text-white grid place-items-center mb-4"><i
-                    data-lucide="shield" class="w-6 h-6"></i></div>
-            <h3 class="font-bold text-xl text-slate-900">Área restrita</h3>
-            <p class="text-sm text-slate-600 mt-1">Acesso exclusivo para equipe da Prefeitura.</p>
-            <input type="password" placeholder="Senha de gestor"
-                class="mt-5 w-full rounded-xl border-slate-300 p-3 focus:border-[#2E7D32] focus:ring-green-100">
-            <div class="flex gap-2.5 mt-4">
-                <button onclick="fecharRestrito()"
-                    class="flex-1 py-2.5 rounded-xl border border-slate-300 font-medium hover:bg-slate-50">Cancelar</button>
-                <button
-                    class="flex-1 py-2.5 rounded-xl bg-slate-900 text-white font-medium hover:bg-black">Entrar</button>
-            </div>
-        </div>
-    </div>
+    <footer class="bg-slate-950 text-slate-400 border-t border-slate-800"><div class="max-w-7xl mx-auto px-6 py-8 flex flex-col md:flex-row items-center justify-between gap-4"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-lg bg-white/10 grid place-items-center"><span class="text-white font-bold text-xs">SB</span></div><div><p class="text-white text-sm font-medium leading-none">Prefeitura de São Borja</p><p class="text-[11px] mt-1">Observatório Agenda 2040 © 2025</p></div></div></div></footer>
 
     <script>
         lucide.createIcons();
-
-        // CONFIGURE AQUI SUA URL DO APPS SCRIPT
         const GAS_URL = 'https://script.google.com/macros/s/AKfycbwszmmKjZRLbEB0-aAkqW0dOUvAsFWQALkWvS2bYMhgYv_xCQsJfFTCIL1ZoqqJ2xRT/exec';
-
         const eixos = [
             { key: 'I Desenvolvimento econômico, governança, transparência inovação' },
             { key: 'II Sustentabilidade ambiental rural' },
@@ -717,157 +128,26 @@
             { key: 'V Infraestrutura, mobilidade urbanismo' },
             { key: 'Outros' }
         ];
-
-        function animateCount(el, to) {
-            if (!el) return;
-            const from = parseInt(el.textContent) || 0;
-            const duration = 1200;
-            const start = performance.now();
-            function step(t) {
-                const p = Math.min((t - start) / duration, 1);
-                const ease = 1 - Math.pow(1 - p, 3);
-                el.textContent = Math.floor(from + (to - from) * ease).toLocaleString('pt-BR');
-                if (p < 1) requestAnimationFrame(step);
-            }
-            requestAnimationFrame(step);
-        }
-
+        function animateCount(el, to) { if (!el) return; const from = parseInt(el.textContent) || 0; const duration = 1200; const start = performance.now(); function step(t) { const p = Math.min((t - start) / duration, 1); const ease = 1 - Math.pow(1 - p, 3); el.textContent = Math.floor(from + (to - from) * ease).toLocaleString('pt-BR'); if (p < 1) requestAnimationFrame(step); } requestAnimationFrame(step); }
         async function carregarStats() {
           try {
             const res = await fetch(GAS_URL + '?action=stats&v=' + Date.now());
             if (!res.ok) throw new Error('Erro HTTP ' + res.status);
             const data = await res.json();
-        
-            // Total e tipos
             animateCount(document.getElementById('total-contribuicoes'), data.total || 0);
             document.getElementById('t-problema').textContent = data.porTipo?.Problema || 0;
             document.getElementById('t-ideia').textContent = data.porTipo?.Ideia || 0;
             document.getElementById('t-oportunidade').textContent = data.porTipo?.Oportunidade || 0;
-        
-            // Eixos - usa dados REAIS da planilha
             const total = Math.max(data.total || 1, 1);
-            eixos.forEach((eixo, i) => {
-              const val = data.porEixo?.[eixo.key] || 0;
-              animateCount(document.getElementById('count-' + i), val);
-              const bar = document.querySelector('[data-bar="' + i + '"]');
-              if (bar) setTimeout(() => bar.style.width = ((val / total) * 100) + '%', 200);
-            });
-        
-          } catch (err) {
-            console.error('Falha ao buscar planilha:', err);
-            // SEM DADOS FICTÍCIOS - mostra zeros
-            animateCount(document.getElementById('total-contribuicoes'), 0);
-            document.getElementById('t-problema').textContent = 0;
-            document.getElementById('t-ideia').textContent = 0;
-            document.getElementById('t-oportunidade').textContent = 0;
-            eixos.forEach((_, i) => {
-              animateCount(document.getElementById('count-' + i), 0);
-              const bar = document.querySelector('[data-bar="' + i + '"]');
-              if (bar) bar.style.width = '0%';
-            });
-          }
+            eixos.forEach((eixo, i) => { const val = data.porEixo?.[eixo.key] || 0; animateCount(document.getElementById('count-' + i), val); const bar = document.querySelector('[data-bar="' + i + '"]'); if (bar) setTimeout(() => bar.style.width = ((val / total) * 100) + '%', 200); });
+          } catch (err) { console.error('Falha ao buscar planilha:', err); animateCount(document.getElementById('total-contribuicoes'), 0); document.getElementById('t-problema').textContent = 0; document.getElementById('t-ideia').textContent = 0; document.getElementById('t-oportunidade').textContent = 0; eixos.forEach((_, i) => { animateCount(document.getElementById('count-' + i), 0); const bar = document.querySelector('[data-bar="' + i + '"]'); if (bar) bar.style.width = '0%'; }); }
         }
-        carregarStats();
-        setInterval(carregarStats, 300);
-
-        // TRANSCRIÇÃO DE VOZ
-        const btnVoz = document.getElementById('btn-voz');
-        const vozStatus = document.getElementById('voz-status');
-        const txt = document.getElementById('conteudo');
-        const aviso = document.getElementById('voz-aviso');
-        let rec, ouvindo = false;
-        const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
-
-        if (!SpeechRec) {
-            btnVoz.disabled = true;
-            btnVoz.classList.add('opacity-50', 'cursor-not-allowed');
-            aviso.classList.remove('hidden');
-        } else {
-            rec = new SpeechRec();
-            rec.lang = 'pt-BR';
-            rec.continuous = true;
-            rec.interimResults = true;
-
-            rec.onstart = () => { ouvindo = true; vozStatus.classList.remove('hidden'); btnVoz.innerHTML = '⏹️ Parar gravação'; btnVoz.classList.replace('bg-slate-900', 'bg-red-600'); };
-            rec.onend = () => { ouvindo = false; vozStatus.classList.add('hidden'); btnVoz.innerHTML = '🎤 Falar em vez de digitar'; btnVoz.classList.replace('bg-red-600', 'bg-slate-900'); };
-            rec.onerror = (e) => { console.error(e); vozStatus.classList.add('hidden'); };
-            rec.onresult = (e) => {
-                let final = '';
-                for (let i = e.resultIndex; i < e.results.length; i++) { final += e.results[i][0].transcript; }
-                txt.value = final;
-                txt.dispatchEvent(new Event('input'));
-            };
-            btnVoz.onclick = () => { if (ouvindo) rec.stop(); else rec.start(); };
-        }
-
-        // GPS
-        document.getElementById('btn-gps').onclick = () => {
-            const status = document.getElementById('gps-status');
-            const btn = document.getElementById('btn-gps');
-            if (!navigator.geolocation) { status.textContent = 'GPS não suportado'; return; }
-            status.textContent = 'Obtendo localização...';
-            navigator.geolocation.getCurrentPosition(p => {
-                document.getElementById('latitude').value = p.coords.latitude.toFixed(6);
-                document.getElementById('longitude').value = p.coords.longitude.toFixed(6);
-                status.innerHTML = '<span class="text-[#2E7D32] font-medium">✓ Localização capturada</span>';
-                btn.innerHTML = '<i data-lucide="check" class="w-4 h-4 text-[#2E7D32]"></i> Localização capturada';
-                lucide.createIcons();
-            }, () => { status.textContent = 'Permissão negada — ative o GPS'; });
-        };
-
-        // FORM
-        const form = document.getElementById('form-contrib');
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const btn = document.getElementById('btn-enviar');
-            const msg = document.getElementById('form-msg');
-
-            if (!form.lgpd.checked) {
-                msg.textContent = 'Por favor, aceite os termos da LGPD.';
-                msg.className = 'text-center text-sm p-3 rounded-xl bg-red-50 text-red-700 border border-red-200';
-                msg.classList.remove('hidden');
-                return;
-            }
-
-            btn.disabled = true;
-            btn.innerHTML = '<span class="animate-pulse">Enviando...</span>';
-
-            const dados = {
-                dataHora: new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }),
-                tipo: form.tipo.value,
-                conteudo: form.conteudo.value.trim(),
-                eixo: form.eixo.value,
-                eixoSugerido: '',
-                latitude: form.latitude.value,
-                longitude: form.longitude.value,
-                nome: form.nome.value,
-                instituicao: form.instituicao.value,
-                userAgent: navigator.userAgent
-            };
-
-            try {
-                await fetch(GAS_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(dados), headers: { 'Content-Type': 'text/plain;charset=utf-8' } });
-                msg.innerHTML = '✓ <strong>Contribuição enviada!</strong> Obrigado por ajudar a construir São Borja 2040.';
-                msg.className = 'text-center text-sm p-3 rounded-xl bg-green-50 text-green-800 border border-green-200 font-medium';
-                msg.classList.remove('hidden');
-                form.reset();
-                document.getElementById('gps-status').textContent = '';
-                setTimeout(carregarStats, 1500);
-            } catch (err) {
-                msg.textContent = 'Erro ao enviar. Verifique sua conexão e tente novamente.';
-                msg.className = 'text-center text-sm p-3 rounded-xl bg-red-50 text-red-700 border border-red-200';
-                msg.classList.remove('hidden');
-            }
-            btn.disabled = false;
-            btn.innerHTML = '<i data-lucide="send" class="w-4 h-4"></i> Enviar contribuição';
-            lucide.createIcons();
-            setTimeout(() => msg.classList.add('hidden'), 8000);
-        });
-
-        function abrirRestrito() { document.getElementById('modal-restrito').classList.remove('hidden'); document.getElementById('modal-restrito').classList.add('flex'); }
-        function fecharRestrito() { document.getElementById('modal-restrito').classList.add('hidden'); document.getElementById('modal-restrito').classList.remove('flex'); }
+        carregarStats(); setInterval(carregarStats, 30000);
+        const btnVoz = document.getElementById('btn-voz'); const vozStatus = document.getElementById('voz-status'); const txt = document.getElementById('conteudo'); const aviso = document.getElementById('voz-aviso'); let rec, ouvindo = false; const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRec) { btnVoz.disabled = true; btnVoz.classList.add('opacity-50', 'cursor-not-allowed'); aviso.classList.remove('hidden'); } else { rec = new SpeechRec(); rec.lang = 'pt-BR'; rec.continuous = true; rec.interimResults = true; rec.onstart = () => { ouvindo = true; vozStatus.classList.remove('hidden'); btnVoz.innerHTML = '⏹️ Parar gravação'; btnVoz.classList.replace('bg-slate-900', 'bg-red-600'); }; rec.onend = () => { ouvindo = false; vozStatus.classList.add('hidden'); btnVoz.innerHTML = '🎤 Falar em vez de digitar'; btnVoz.classList.replace('bg-red-600', 'bg-slate-900'); }; rec.onerror = (e) => { console.error(e); vozStatus.classList.add('hidden'); }; rec.onresult = (e) => { let final = ''; for (let i = e.resultIndex; i < e.results.length; i++) { final += e.results[i][0].transcript; } txt.value = final; txt.dispatchEvent(new Event('input')); }; btnVoz.onclick = () => { if (ouvindo) rec.stop(); else rec.start(); }; }
+        document.getElementById('btn-gps').onclick = () => { const status = document.getElementById('gps-status'); const btn = document.getElementById('btn-gps'); if (!navigator.geolocation) { status.textContent = 'GPS não suportado'; return; } status.textContent = 'Obtendo localização...'; navigator.geolocation.getCurrentPosition(p => { document.getElementById('latitude').value = p.coords.latitude.toFixed(6); document.getElementById('longitude').value = p.coords.longitude.toFixed(6); status.innerHTML = '<span class="text-[#2E7D32] font-medium">✓ Localização capturada</span>'; btn.innerHTML = '<i data-lucide="check" class="w-4 h-4 text-[#2E7D32]"></i> Localização capturada'; lucide.createIcons(); }, () => { status.textContent = 'Permissão negada'; }); };
+        const form = document.getElementById('form-contrib'); form.addEventListener('submit', async (e) => { e.preventDefault(); const btn = document.getElementById('btn-enviar'); const msg = document.getElementById('form-msg'); if (!form.lgpd.checked) { msg.textContent = 'Por favor, aceite os termos da LGPD.'; msg.className = 'text-center text-sm p-3 rounded-xl bg-red-50 text-red-700 border border-red-200'; msg.classList.remove('hidden'); return; } btn.disabled = true; btn.innerHTML = '<span class="animate-pulse">Enviando...</span>'; const dados = { dataHora: new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }), tipo: form.tipo.value, conteudo: form.conteudo.value.trim(), eixo: form.eixo.value, eixoSugerido: '', latitude: form.latitude.value, longitude: form.longitude.value, nome: form.nome.value, instituicao: form.instituicao.value, userAgent: navigator.userAgent }; try { await fetch(GAS_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(dados), headers: { 'Content-Type': 'text/plain;charset=utf-8' } }); msg.innerHTML = '✓ <strong>Contribuição enviada!</strong> Obrigado por ajudar a construir São Borja 2040.'; msg.className = 'text-center text-sm p-3 rounded-xl bg-green-50 text-green-800 border border-green-200 font-medium'; msg.classList.remove('hidden'); form.reset(); document.getElementById('gps-status').textContent = ''; setTimeout(carregarStats, 1500); } catch (err) { msg.textContent = 'Erro ao enviar. Verifique sua conexão.'; msg.className = 'text-center text-sm p-3 rounded-xl bg-red-50 text-red-700 border border-red-200'; msg.classList.remove('hidden'); } btn.disabled = false; btn.innerHTML = '<i data-lucide="send" class="w-4 h-4"></i> Enviar contribuição'; lucide.createIcons(); setTimeout(() => msg.classList.add('hidden'), 8000); });
     </script>
-
 </body>
-
 </html>
+
