@@ -1,0 +1,1241 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+
+<head>
+    <!-- Playables SDK -->
+    <script>// Playables SDK v1.0.0
+        // Game lifecycle bridge: rAF-based game-ready detection + event communication
+        (function () {
+            'use strict';
+
+            // Idempotency: skip if already initialized (e.g., server-side injection
+            // followed by client-side inject-javascript via the Bloks webview component).
+            if (window.playablesSDK) return;
+
+            var HANDLER_NAME = 'playablesGameEventHandler';
+            var ANDROID_BRIDGE_NAME = '_MetaPlayablesBridge';
+            var RAF_FRAME_THRESHOLD = 3;
+
+            var gameReadySent = false;
+            var firstInteractionSent = false;
+            var errorSent = false;
+            var frameCount = 0;
+            var originalRAF = window.requestAnimationFrame;
+
+            // --- Transport Layer ---
+
+            function hasIOSBridge() {
+                return !!(window.webkit &&
+                    window.webkit.messageHandlers &&
+                    window.webkit.messageHandlers[HANDLER_NAME]);
+            }
+
+            function hasAndroidBridge() {
+                return !!(window[ANDROID_BRIDGE_NAME] &&
+                    typeof window[ANDROID_BRIDGE_NAME].postEvent === 'function');
+            }
+
+            function isInIframe() {
+                return !!(window.parent && window.parent !== window);
+            }
+
+            function sendEvent(eventName, payload) {
+                var message = {
+                    type: eventName,
+                    payload: payload || {},
+                    timestamp: Date.now()
+                };
+
+                if (hasIOSBridge()) {
+                    try {
+                        window.webkit.messageHandlers[HANDLER_NAME].postMessage(message);
+                    } catch (e) { /* ignore */ }
+                    return;
+                }
+
+                if (hasAndroidBridge()) {
+                    try {
+                        var p = payload || {};
+                        p.__secureToken = window.__fbAndroidBridgeAuthToken || '';
+                        window[ANDROID_BRIDGE_NAME].postEvent(
+                            eventName,
+                            JSON.stringify(p)
+                        );
+                    } catch (e) { /* ignore */ }
+                    return;
+                }
+
+                if (isInIframe()) {
+                    try {
+                        window.parent.postMessage(message, '*');
+                    } catch (e) { /* ignore */ }
+                    return;
+                }
+            }
+
+            // --- rAF Game-Ready Detection ---
+
+            function onFrame() {
+                if (gameReadySent) return;
+
+                frameCount++;
+                if (frameCount >= RAF_FRAME_THRESHOLD) {
+                    gameReadySent = true;
+                    sendEvent('game_ready', {
+                        frame_count: frameCount,
+                        detected_at: Date.now()
+                    });
+                    return;
+                }
+
+                originalRAF.call(window, onFrame);
+            }
+
+            if (originalRAF) {
+                window.requestAnimationFrame = function (callback) {
+                    if (!gameReadySent) {
+                        return originalRAF.call(window, function (timestamp) {
+                            frameCount++;
+                            if (frameCount >= RAF_FRAME_THRESHOLD && !gameReadySent) {
+                                gameReadySent = true;
+                                sendEvent('game_ready', {
+                                    frame_count: frameCount,
+                                    detected_at: Date.now()
+                                });
+                            }
+                            callback(timestamp);
+                        });
+                    }
+                    return originalRAF.call(window, callback);
+                };
+            }
+
+            // --- First User Interaction Detection ---
+
+            function setupFirstInteractionDetection() {
+                var events = ['touchstart', 'mousedown', 'keydown'];
+
+                function onFirstInteraction() {
+                    if (firstInteractionSent) return;
+                    firstInteractionSent = true;
+                    sendEvent('user_interaction_start', null);
+
+                    for (var i = 0; i < events.length; i++) {
+                        document.removeEventListener(events[i], onFirstInteraction, true);
+                    }
+                }
+
+                for (var i = 0; i < events.length; i++) {
+                    document.addEventListener(events[i], onFirstInteraction, true);
+                }
+            }
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', setupFirstInteractionDetection);
+            } else {
+                setupFirstInteractionDetection();
+            }
+
+            // --- Auto Error Capture ---
+
+            window.addEventListener('error', function (event) {
+                if (errorSent) return;
+                errorSent = true;
+                sendEvent('error', {
+                    message: event.message || 'Unknown error',
+                    source: event.filename || '',
+                    lineno: event.lineno || 0,
+                    colno: event.colno || 0,
+                    auto_captured: true
+                });
+            });
+
+            window.addEventListener('unhandledrejection', function (event) {
+                if (errorSent) return;
+                errorSent = true;
+                var reason = event.reason;
+                sendEvent('error', {
+                    message: (reason instanceof Error) ? reason.message : String(reason),
+                    type: 'unhandled_promise_rejection',
+                    auto_captured: true
+                });
+            });
+
+            // --- Public API ---
+
+            window.playablesSDK = {
+                complete: function (score) {
+                    sendEvent('game_ended', {
+                        score: score,
+                        completed: true
+                    });
+                },
+
+                error: function (message) {
+                    if (errorSent) return;
+                    errorSent = true;
+                    sendEvent('error', {
+                        message: message || 'Unknown error',
+                        auto_captured: false
+                    });
+                },
+
+                sendEvent: function (eventName, payload) {
+                    if (!eventName || typeof eventName !== 'string') return;
+                    sendEvent(eventName, payload);
+                }
+            };
+
+            // Kick off rAF detection in case no game code calls rAF immediately
+            if (originalRAF) {
+                originalRAF.call(window, onFrame);
+            }
+        })();</script>
+    <script>window.Intl = window.Intl || {}; Intl.t = function (s) { return (Intl._locale && Intl._locale[s]) || s; };</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <h1>ório Agenda 2040 – São Borja</h1>
+    </title>
+    <meta name="description"
+        content="Participe da construção do futuro de São Borja. Contribua com ideias, problemas e oportunidades para a Agenda 2040.">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+    <!-- Playables SDK -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-PLAYABLES"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-PLAYABLES');
+    </script>
+
+    <style>
+        :root {
+            --primary: #2E7D32;
+            --primary-dark: #1B5E20;
+            --primary-light: #4CAF50;
+            --accent: #66BB6A;
+        }
+
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .hover-lift {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .hover-lift:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(46, 125, 50, 0.15);
+        }
+
+        .btn-gradient {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            transition: all 0.3s ease;
+        }
+
+        .btn-gradient:hover {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, #0d4f0f 100%);
+            box-shadow: 0 12px 24px rgba(46, 125, 50, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .pulse-ring {
+            animation: pulse-ring 1.5s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+        }
+
+        @keyframes pulse-ring {
+            0% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+            }
+
+            70% {
+                transform: scale(1);
+                box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+            }
+
+            100% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+            }
+        }
+
+        .modal-backdrop {
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
+        }
+
+        select,
+        input,
+        textarea {
+            transition: all 0.3s ease;
+        }
+
+        select:focus,
+        input:focus,
+        textarea:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1);
+            border-color: var(--primary);
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 text-gray-800 overflow-x-hidden">
+
+    <!-- Navbar -->
+    <nav id="navbar" class="fixed top-0 w-full z-50 transition-all duration-300 bg-transparent">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <div class="flex items-center gap-3">
+                    <div
+                        class="w-10 h-10 rounded-xl bg-gradient-to-br from-green-600 to-green-800 flex items-center justify-center">
+                        <i data-lucide="compass" class="w-6 h-6 text-white"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-lg font-bold text-white leading-tight">Observatório</h1>
+                        <p class="text-xs text-green-100">Agenda 2040 SB</p>
+                    </div>
+                </div>
+
+                <div class="hidden md:flex items-center gap-8">
+                    <a href="#como-funciona" class="text-white/90 hover:text-black font-medium transition">Como
+                        Funciona</a>
+                    <a href="#contribuir" class="text-white/90 hover:text-black font-medium transition">Contribuir</a>
+                    <a href="#numeros" class="text-white/90 hover:text-black font-medium transition">Números</a>
+                    <a href="#contribuir"
+                        class="px-6 py-2.5 bg-black text-green-700 rounded-xl font-semibold hover:bg-green-50 transition-all duration-300">
+                        Participar
+                    </a>
+                </div>
+
+                <button id="menuBtn" class="md:hidden text-white">
+                    <i data-lucide="menu" class="w-6 h-6"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div id="mobileMenu" class="hidden md:hidden glass border-t border-white/20">
+            <div class="px-4 py-4 space-y-3">
+                <a href="#como-funciona" class="block text-white py-2 font-medium">Como Funciona</a>
+                <a href="#contribuir" class="block text-white py-2 font-medium">Contribuir</a>
+                <a href="#numeros" class="block text-white py-2 font-medium">Números</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="relative min-h-screen flex items-center justify-center overflow-hidden"
+        style="background: linear-gradient(135deg, #2E7D32 0%, #1B5E20 100%);">
+        <div class="absolute inset-0 opacity-10">
+            <div class="absolute top-20 left-10 w-72 h-72 bg-white rounded-full blur-3xl"></div>
+            <div class="absolute bottom-20 right-10 w-96 h-96 bg-green-300 rounded-full blur-3xl"></div>
+        </div>
+
+        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32 text-center">
+            <div class="fade-in">
+                <span class="inline-block px-4 py-2 glass rounded-full text-sm font-semibold text-white mb-6">
+                    Construindo o futuro juntos
+                </span>
+                <h1 class="text-4xl sm:text-5xl lg:text-7xl font-bold text-white mb-6 leading-tight">
+                    Observatório<br>Agenda 2040<br>São Borja
+                </h1>
+                <p class="text-lg sm:text-xl text-green-50 max-w-2xl mx-auto mb-12 leading-relaxed">
+                    Sua voz importa! Compartilhe problemas, ideias e oportunidades para transformarmos São Borja até
+                    2040.
+                </p>
+            </div>
+
+            <!-- Countdown -->
+            <div class="fade-in glass rounded-2xl p-8 max-w-4xl mx-auto mb-12">
+                <p class="text-green-100 font-semibold mb-6 text-sm uppercase tracking-wider">Faltam para 31/12/2026</p>
+                <div class="grid grid-cols-4 gap-4 sm:gap-8">
+                    <div class="text-center">
+                        <div id="days" class="text-4xl sm:text-6xl font-bold text-white mb-2">000</div>
+                        <div class="text-xs sm:text-sm text-green-100 uppercase tracking-wide">Dias</div>
+                    </div>
+                    <div class="text-center">
+                        <div id="hours" class="text-4xl sm:text-6xl font-bold text-white mb-2">00</div>
+                        <div class="text-xs sm:text-sm text-green-100 uppercase tracking-wide">Horas</div>
+                    </div>
+                    <div class="text-center">
+                        <div id="minutes" class="text-4xl sm:text-6xl font-bold text-white mb-2">00</div>
+                        <div class="text-xs sm:text-sm text-green-100 uppercase tracking-wide">Minutos</div>
+                    </div>
+                    <div class="text-center">
+                        <div id="seconds" class="text-4xl sm:text-6xl font-bold text-white mb-2">00</div>
+                        <div class="text-xs sm:text-sm text-green-100 uppercase tracking-wide">Segundos</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="fade-in flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="#contribuir"
+                    class="px-8 py-4 bg-white text-green-700 rounded-xl font-bold text-lg hover-lift shadow-xl">
+                    Quero Contribuir
+                </a>
+                <a href="#como-funciona" class="px-8 py-4 glass text-white rounded-xl font-bold text-lg hover-lift">
+                    Saiba Mais
+                </a>
+            </div>
+        </div>
+
+        <div class="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
+            <i data-lucide="chevron-down" class="w-8 h-8 text-white/70"></i>
+        </div>
+    </section>
+
+    <!-- Como Funciona -->
+    <section id="como-funciona" class="py-20 sm:py-32 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16 fade-in">
+                <span class="text-green-600 font-semibold text-sm uppercase tracking-wider">Processo</span>
+                <h2 class="text-3xl sm:text-5xl font-bold text-gray-900 mt-2 mb-4">Como Funciona</h2>
+                <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+                    Em 3 passos simples você contribui para o futuro da nossa cidade
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="fade-in glass-card rounded-2xl p-8 hover-lift">
+                    <div
+                        class="w-14 h-14 rounded-xl bg-gradient-to-br from-green-500 to-green-700 flex items-center justify-center mb-6">
+                        <i data-lucide="message-square" class="w-7 h-7 text-white"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-3">1. Compartilhe</h3>
+                    <p class="text-gray-600 leading-relaxed">
+                        Conte-nos sobre problemas que você enfrenta, ideias inovadoras ou oportunidades que identifica
+                        em São Borja.
+                    </p>
+                </div>
+
+                <div class="fade-in glass-card rounded-2xl p-8 hover-lift">
+                    <div
+                        class="w-14 h-14 rounded-xl bg-gradient-to-br from-green-500 to-green-700 flex items-center justify-center mb-6">
+                        <i data-lucide="clipboard-list" class="w-7 h-7 text-white"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-3">2. Categorizamos</h3>
+                    <p class="text-gray-600 leading-relaxed">
+                        Organizamos sua contribuição por eixo temático e localização para análise estratégica dos dados
+                        coletados.
+                    </p>
+                </div>
+
+                <div class="fade-in glass-card rounded-2xl p-8 hover-lift">
+                    <div
+                        class="w-14 h-14 rounded-xl bg-gradient-to-br from-green-500 to-green-700 flex items-center justify-center mb-6">
+                        <i data-lucide="trending-up" class="w-7 h-7 text-white"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-3">3. Transformamos</h3>
+                    <p class="text-gray-600 leading-relaxed">
+                        As contribuições geram insights para políticas públicas e ações que constroem a São Borja de
+                        2040.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contribuir - Formulário -->
+    <section id="contribuir" class="py-20 sm:py-32 bg-gradient-to-b from-gray-50 to-white">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12 fade-in">
+                <span class="text-green-600 font-semibold text-sm uppercase tracking-wider">Participe</span>
+                <h2 class="text-3xl sm:text-5xl font-bold text-gray-900 mt-2 mb-4">Contribuir</h2>
+                <p class="text-lg text-gray-600">
+                    Preencha o formulário abaixo e faça parte da mudança
+                </p>
+            </div>
+
+            <form id="contributionForm" class="fade-in glass-card rounded-2xl p-6 sm:p-10 shadow-xl">
+                <!-- Tipo de Contribuição -->
+                <div class="mb-8">
+                    <label class="block text-sm font-semibold text-gray-900 mb-3">
+                        1. Tipo de Contribuição <span class="text-red-500">*</span>
+                    </label>
+                    <div class="grid sm:grid-cols-3 gap-4">
+                        <button type="button" class="type-btn group" data-type="Problema" data-info="problema">
+                            <div
+                                class="p-6 rounded-xl border-2 border-gray-200 hover:border-green-500 transition-all duration-300 text-left">
+                                <i data-lucide="alert-circle" class="w-8 h-8 text-red-500 mb-3"></i>
+                                <h4 class="font-bold text-gray-900 mb-1">Problema</h4>
+                                <p class="text-xs text-gray-600">Questões que precisam ser resolvidas</p>
+                            </div>
+                        </button>
+
+                        <button type="button" class="type-btn group" data-type="Ideia" data-info="ideia">
+                            <div
+                                class="p-6 rounded-xl border-2 border-gray-200 hover:border-green-500 transition-all duration-300 text-left">
+                                <i data-lucide="lightbulb" class="w-8 h-8 text-yellow-500 mb-3"></i>
+                                <h4 class="font-bold text-gray-900 mb-1">Ideia</h4>
+                                <p class="text-xs text-gray-600">Sugestões e propostas inovadoras</p>
+                            </div>
+                        </button>
+
+                        <button type="button" class="type-btn group" data-type="Oportunidade" data-info="oportunidade">
+                            <div
+                                class="p-6 rounded-xl border-2 border-gray-200 hover:border-green-500 transition-all duration-300 text-left">
+                                <i data-lucide="target" class="w-8 h-8 text-green-500 mb-3"></i>
+                                <h4 class="font-bold text-gray-900 mb-1">Oportunidade</h4>
+                                <p class="text-xs text-gray-600">Potenciais a serem explorados</p>
+                            </div>
+                        </button>
+                    </div>
+                    <input type="hidden" id="tipoContribuicao" required>
+                    <button type="button" id="helpTypeBtn"
+                        class="mt-3 text-sm text-green-600 hover:text-green-700 font-medium flex items-center gap-1">
+                        <i data-lucide="help-circle" class="w-4 h-4"></i>
+                        Não sei qual escolher
+                    </button>
+                </div>
+
+                <!-- Como Contribuir -->
+                <div class="mb-8">
+                    <label class="block text-sm font-semibold text-gray-900 mb-3">
+                        2. Como você quer contribuir? <span class="text-red-500">*</span>
+                    </label>
+                    <div class="flex gap-4">
+                        <label class="flex-1 cursor-pointer">
+                            <input type="radio" name="modoContribuicao" value="texto" class="peer sr-only" checked>
+                            <div
+                                class="p-4 rounded-xl border-2 border-gray-200 peer-checked:border-green-500 peer-checked:bg-green-50 transition-all duration-300 text-center">
+                                <i data-lucide="type" class="w-6 h-6 mx-auto mb-2 text-gray-700"></i>
+                                <span class="font-medium text-sm">Texto</span>
+                            </div>
+                        </label>
+                        <label class="flex-1 cursor-pointer">
+                            <input type="radio" name="modoContribuicao" value="audio" class="peer sr-only">
+                            <div
+                                class="p-4 rounded-xl border-2 border-gray-200 peer-checked:border-green-500 peer-checked:bg-green-50 transition-all duration-300 text-center">
+                                <i data-lucide="mic" class="w-6 h-6 mx-auto mb-2 text-gray-700"></i>
+                                <span class="font-medium text-sm">Áudio</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Descrição / Gravação -->
+                <div class="mb-8">
+                    <label class="block text-sm font-semibold text-gray-900 mb-3">
+                        3. Descreva sua contribuição <span class="text-red-500">*</span>
+                    </label>
+
+                    <!-- Campo Texto -->
+                    <div id="textoField">
+                        <textarea id="descricaoTexto" rows="6"
+                            class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-green-500 resize-none"
+                            placeholder="Descreva detalhadamente sua contribuição..."></textarea>
+                    </div>
+
+                    <!-- Campo Áudio -->
+                    <div id="audioField" class="hidden">
+                        <div class="glass-card rounded-xl p-6 text-center">
+                            <div id="recordingStatus" class="mb-4">
+                                <div
+                                    class="w-20 h-20 mx-auto rounded-full bg-gray-200 flex items-center justify-center mb-4">
+                                    <i data-lucide="mic" class="w-10 h-10 text-gray-600"></i>
+                                </div>
+                                <p class="text-sm text-gray-600">Clique para iniciar a gravação</p>
+                            </div>
+                            <button type="button" id="recordBtn"
+                                class="px-6 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl font-semibold transition-all duration-300">
+                                Iniciar Gravação
+                            </button>
+                            <div id="transcriptionResult" class="mt-4 hidden">
+                                <p class="text-sm font-semibold text-gray-700 mb-2">Transcrição:</p>
+                                <textarea id="audioTranscription" rows="4"
+                                    class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 resize-none bg-gray-50"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Resumo Automático -->
+                <div id="summaryField" class="mb-8 hidden">
+                    <div class="bg-green-50 border-2 border-green-200 rounded-xl p-6">
+                        <div class="flex items-start gap-3 mb-3">
+                            <i data-lucide="sparkles" class="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5"></i>
+                            <div>
+                                <h4 class="font-bold text-gray-900 mb-1">Preview da sua contribuição</h4>
+                                <p class="text-sm text-gray-600" id="summaryText"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Eixo Temático -->
+                <div class="mb-8">
+                    <label class="block text-sm font-semibold text-gray-900 mb-3">
+                        6. Eixo Temático <span class="text-red-500">*</span>
+                    </label>
+                    <select id="eixoTematico" required
+                        class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-green-500 bg-white">
+                        <option value="">Selecione um eixo</option>
+                        <option value="Desenvolvimento Econômico">Desenvolvimento Econômico</option>
+                        <option value="Educação e Cultura">Educação e Cultura</option>
+                        <option value="Saúde e Bem-estar">Saúde e Bem-estar</option>
+                        <option value="Infraestrutura e Mobilidade">Infraestrutura e Mobilidade</option>
+                        <option value="Meio Ambiente">Meio Ambiente</option>
+                        <option value="Inovação e Tecnologia">Inovação e Tecnologia</option>
+                        <option value="Não sei">Não sei informar</option>
+                    </select>
+                </div>
+
+                <!-- Localização -->
+                <div class="mb-8">
+                    <label class="block text-sm font-semibold text-gray-900 mb-3">
+                        7. Localização
+                    </label>
+                    <div class="grid sm:grid-cols-2 gap-4">
+                        <div>
+                            <input type="text" id="bairro" placeholder="Bairro"
+                                class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-green-500">
+                        </div>
+                        <div>
+                            <button type="button" id="getLocationBtn"
+                                class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 hover:border-green-500 transition-all duration-300 flex items-center justify-center gap-2 text-gray-700 font-medium">
+                                <i data-lucide="map-pin" class="w-5 h-5"></i>
+                                <span id="locationBtnText">Usar GPS</span>
+                            </button>
+                            <input type="hidden" id="latitude">
+                            <input type="hidden" id="longitude">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dados Pessoais -->
+                <div class="mb-8">
+                    <label class="block text-sm font-semibold text-gray-900 mb-3">
+                        8. Identificação
+                    </label>
+                    <div class="grid sm:grid-cols-2 gap-4">
+                        <input type="text" id="nome" placeholder="Seu nome (opcional)"
+                            class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-green-500">
+                        <input type="text" id="instituicao" placeholder="Instituição (opcional)"
+                            class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-green-500">
+                    </div>
+                </div>
+
+                <!-- Botão Enviar -->
+                <button type="submit" id="submitBtn"
+                    class="w-full py-4 btn-gradient text-white rounded-xl font-bold text-lg shadow-xl hover-lift">
+                    Enviar Contribuição
+                </button>
+
+                <p class="text-xs text-gray-500 text-center mt-4">
+                    Ao enviar, você concorda que sua contribuição será utilizada para análises da Agenda 2040
+                </p>
+            </form>
+        </div>
+    </section>
+
+    <!-- Números -->
+    <section id="numeros" class="py-20 sm:py-32 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16 fade-in">
+                <span class="text-green-600 font-semibold text-sm uppercase tracking-wider">Impacto</span>
+                <h2 class="text-3xl sm:text-5xl font-bold text-gray-900 mt-2 mb-4">Números</h2>
+                <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+                    Acompanhe em tempo real as contribuições da comunidade
+                </p>
+            </div>
+
+            <!-- Total -->
+            <div class="fade-in max-w-md mx-auto mb-12">
+                <div class="glass-card rounded-2xl p-8 text-center hover-lift">
+                    <div
+                        class="w-16 h-16 mx-auto rounded-xl bg-gradient-to-br from-green-500 to-green-700 flex items-center justify-center mb-4">
+                        <i data-lucide="bar-chart-3" class="w-8 h-8 text-white"></i>
+                    </div>
+                    <h3 class="text-5xl font-bold text-gray-900 mb-2" id="totalContribuicoes">0</h3>
+                    <p class="text-gray-600 font-medium">Contribuições Totais</p>
+                </div>
+            </div>
+
+            <!-- Cards por Eixo -->
+            <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 fade-in">
+                <div class="glass-card rounded-2xl p-6 hover-lift">
+                    <i data-lucide="briefcase" class="w-8 h-8 text-green-600 mb-4"></i>
+                    <h4 class="font-bold text-gray-900 mb-1">Desenvolvimento Econômico</h4>
+                    <p class="text-3xl font-bold text-gray-900" id="count-economia">0</p>
+                </div>
+
+                <div class="glass-card rounded-2xl p-6 hover-lift">
+                    <i data-lucide="graduation-cap" class="w-8 h-8 text-green-600 mb-4"></i>
+                    <h4 class="font-bold text-gray-900 mb-1">Educação e Cultura</h4>
+                    <p class="text-3xl font-bold text-gray-900" id="count-educacao">0</p>
+                </div>
+
+                <div class="glass-card rounded-2xl p-6 hover-lift">
+                    <i data-lucide="heart-pulse" class="w-8 h-8 text-green-600 mb-4"></i>
+                    <h4 class="font-bold text-gray-900 mb-1">Saúde e Bem-estar</h4>
+                    <p class="text-3xl font-bold text-gray-900" id="count-saude">0</p>
+                </div>
+
+                <div class="glass-card rounded-2xl p-6 hover-lift">
+                    <i data-lucide="building-2" class="w-8 h-8 text-green-600 mb-4"></i>
+                    <h4 class="font-bold text-gray-900 mb-1">Infraestrutura e Mobilidade</h4>
+                    <p class="text-3xl font-bold text-gray-900" id="count-infra">0</p>
+                </div>
+
+                <div class="glass-card rounded-2xl p-6 hover-lift">
+                    <i data-lucide="leaf" class="w-8 h-8 text-green-600 mb-4"></i>
+                    <h4 class="font-bold text-gray-900 mb-1">Meio Ambiente</h4>
+                    <p class="text-3xl font-bold text-gray-900" id="count-meio">0</p>
+                </div>
+
+                <div class="glass-card rounded-2xl p-6 hover-lift">
+                    <i data-lucide="cpu" class="w-8 h-8 text-green-600 mb-4"></i>
+                    <h4 class="font-bold text-gray-900 mb-1">Inovação e Tecnologia</h4>
+                    <p class="text-3xl font-bold text-gray-900" id="count-tech">0</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Rodapé -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-3 gap-8 mb-8">
+                <div>
+                    <div class="flex items-center gap-3 mb-4">
+                        <div
+                            class="w-10 h-10 rounded-xl bg-gradient-to-br from-green-600 to-green-800 flex items-center justify-center">
+                            <i data-lucide="compass" class="w-6 h-6 text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold">Observatório</h3>
+                            <p class="text-xs text-gray-400">Agenda 2040 SB</p>
+                        </div>
+                        <p class="text-gray-400 text-sm leading-relaxed">
+                            Construindo coletivamente o futuro de São Borja através da participação cidadã.
+                        </p>
+                    </div>
+
+                    <div>
+                        <h4 class="font-bold mb-4">Links Rápidos</h4>
+                        <ul class="space-y-2 text-sm text-gray-400">
+                            <li><a href="#como-funciona" class="hover:text-white transition">Como Funciona</a></li>
+                            <li><a href="#contribuir" class="hover:text-white transition">Contribuir</a></li>
+                            <li><a href="#numeros" class="hover:text-white transition">Números</a></li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h4 class="font-bold mb-4">Contato</h4>
+                        <p class="text-sm text-gray-400 mb-2">Incubadora do IFFar-SB</p>
+                        <a href="mailto:bruno.siqueira@iffarroupilha.edu.br"
+                            class="text-sm text-green-400 hover:text-green-300 transition">
+                            E-mail
+                        </a>
+                    </div>
+                </div>
+
+                <div class="border-t border-gray-800 pt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
+                    <p class="text-sm text-gray-400">
+                        Desenvolvido por: Incubadora do IFFar-SB
+                    </p>
+
+                    <!-- Área Restrita Discreta -->
+                    <button id="adminBtn"
+                        class="text-gray-600 hover:text-gray-400 transition-all duration-300 flex items-center gap-1.5 text-xs">
+                        <i data-lucide="lock" class="w-3 h-3"></i>
+                        <span>Área Restrita</span>
+                    </button>
+                </div>
+            </div>
+    </footer>
+
+    <!-- Modal Ajuda Tipo -->
+    <div id="helpModal" class="hidden fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4">
+        <div class="glass-card rounded-2xl max-w-2xl w-full p-8 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-start mb-6">
+                <h3 class="text-2xl font-bold text-gray-900">Qual tipo escolher?</h3>
+                <button class="closeModal text-gray-500 hover:text-gray-700">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+
+            <div class="space-y-6">
+                <div class="p-4 bg-red-50 rounded-xl border border-red-200">
+                    <div class="flex items-start gap-3">
+                        <i data-lucide="alert-circle" class="w-6 h-6 text-red-500 flex-shrink-0"></i>
+                        <div>
+                            <h4 class="font-bold text-gray-900 mb-2">Problema</h4>
+                            <p class="text-sm text-gray-700 leading-relaxed">
+                                Escolha <strong>Problema</strong> quando quiser relatar algo que está funcionando mal,
+                                uma dificuldade ou desafio que você ou sua comunidade enfrenta. Ex: falta de iluminação,
+                                buracos na rua, atendimento demorado.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-4 bg-yellow-50 rounded-xl border border-yellow-200">
+                    <div class="flex items-start gap-3">
+                        <i data-lucide="lightbulb" class="w-6 h-6 text-yellow-500 flex-shrink-0"></i>
+                        <div>
+                            <h4 class="font-bold text-gray-900 mb-2">Ideia</h4>
+                            <p class="text-sm text-gray-700 leading-relaxed">
+                                Escolha <strong>Ideia</strong> quando tiver uma sugestão, proposta ou projeto que pode
+                                melhorar a cidade. Ex: criar um parque, programa de reciclagem, aplicativo de serviços
+                                municipais.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-4 bg-green-50 rounded-xl border border-green-200">
+                    <div class="flex items-start gap-3">
+                        <i data-lucide="target" class="w-6 h-6 text-green-500 flex-shrink-0"></i>
+                        <div>
+                            <h4 class="font-bold text-gray-900 mb-2">Oportunidade</h4>
+                            <p class="text-sm text-gray-700 leading-relaxed">
+                                Escolha <strong>Oportunidade</strong> quando identificar um potencial não explorado, um
+                                recurso disponível ou uma condição favorável. Ex: terreno vazio para projetos, talentos
+                                locais, parcerias possíveis.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Login Admin -->
+    <div id="adminModal" class="hidden fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4">
+        <div class="glass-card rounded-2xl max-w-md w-full p-8">
+            <div class="flex justify-between items-start mb-6">
+                <h3 class="text-2xl font-bold text-gray-900">Área Restrita</h3>
+                <button class="closeModal text-gray-500 hover:text-gray-700">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+
+            <form id="adminLoginForm">
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold text-gray-900 mb-2">Usuário</label>
+                    <input type="text" id="adminUser" placeholder="admin"
+                        class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-green-500">
+                </div>
+                <div class="mb-6">
+                    <label class="block text-sm font-semibold text-gray-900 mb-2">Senha</label>
+                    <input type="password" id="adminPass" placeholder="••••••••"
+                        class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-green-500">
+                </div>
+                <button type="submit" class="w-full py-3 btn-gradient text-white rounded-xl font-bold">
+                    Entrar
+                </button>
+                <p id="loginError" class="text-red-500 text-sm mt-3 text-center hidden">Credenciais inválidas</p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Sucesso -->
+    <div id="successModal" class="hidden fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4">
+        <div class="glass-card rounded-2xl max-w-md w-full p-8 text-center">
+            <div class="w-20 h-20 mx-auto rounded-full bg-green-100 flex items-center justify-center mb-6">
+                <i data-lucide="check-circle" class="w-12 h-12 text-green-600"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-gray-900 mb-3">Contribuição Enviada!</h3>
+            <p class="text-gray-600 mb-6">Obrigado por participar da construção do futuro de São Borja.</p>
+            <button class="closeModal px-6 py-3 btn-gradient text-white rounded-xl font-bold">
+                Fechar
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwszmmKjZRLbEB0-aAkqW0dOUvAsFWQALkWvS2bYMhgYv_xCQsJfFTCIL1ZoqqJ2xRT/exec';
+
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        // Navbar Scroll Effect
+        const navbar = document.getElementById('navbar');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                navbar.classList.add('glass');
+                navbar.classList.remove('bg-transparent');
+            } else {
+                navbar.classList.remove('glass');
+                navbar.classList.add('bg-transparent');
+            }
+        });
+
+        // Mobile Menu
+        const menuBtn = document.getElementById('menuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        menuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // Fade In on Scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+        // Countdown Timer
+        function updateCountdown() {
+            const targetDate = new Date('2026-12-31T23:59:59').getTime();
+            const now = new Date().getTime();
+            const distance = targetDate - now;
+
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            document.getElementById('days').textContent = String(days).padStart(3, '0');
+            document.getElementById('hours').textContent = String(hours).padStart(2, '0');
+            document.getElementById('minutes').textContent = String(minutes).padStart(2, '0');
+            document.getElementById('seconds').textContent = String(seconds).padStart(2, '0');
+        }
+
+        updateCountdown();
+        setInterval(updateCountdown, 1000);
+
+        // Tipo de Contribuição Selection
+        let selectedType = '';
+        document.querySelectorAll('.type-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.type-btn div').forEach(d => {
+                    d.classList.remove('border-green-500', 'bg-green-50');
+                    d.classList.add('border-gray-200');
+                });
+
+                const div = btn.querySelector('div');
+                div.classList.remove('border-gray-200');
+                div.classList.add('border-green-500', 'bg-green-50');
+
+                selectedType = btn.dataset.type;
+                document.getElementById('tipoContribuicao').value = selectedType;
+
+                updatePlaceholder();
+                updateSummary();
+            });
+        });
+
+        // Dynamic Placeholder
+        function updatePlaceholder() {
+            const placeholders = {
+                'Problema': 'Descreva o problema que você identificou em São Borja. Ex: A iluminação da Rua XV de Novembro está precária, causando insegurança à noite...',
+                'Ideia': 'Compartilhe sua ideia para melhorar São Borja. Ex: Proponho a criação de um parque linear às margens do Rio Uruguai com ciclovia...',
+                'Oportunidade': 'Descreva a oportunidade que você identificou. Ex: O antigo prédio da estação ferroviária poderia ser transformado em um centro cultural...'
+            };
+            document.getElementById('descricaoTexto').placeholder = placeholders[selectedType] || 'Descreva detalhadamente sua contribuição...';
+        }
+
+        // Modo Contribuição Toggle
+        document.querySelectorAll('input[name="modoContribuicao"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                const textoField = document.getElementById('textoField');
+                const audioField = document.getElementById('audioField');
+
+                if (e.target.value === 'texto') {
+                    textoField.classList.remove('hidden');
+                    audioField.classList.add('hidden');
+                } else {
+                    textoField.classList.add('hidden');
+                    audioField.classList.remove('hidden');
+                }
+            });
+        });
+
+        // Web Speech API - Gravação
+        let recognition;
+        let isRecording = false;
+
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            recognition.lang = 'pt-BR';
+
+            recognition.onstart = () => {
+                isRecording = true;
+                document.getElementById('recordBtn').classList.add('pulse-ring');
+                document.getElementById('recordBtn').textContent = 'Gravando... Clique para parar';
+                document.querySelector('#recordingStatus i').classList.add('text-red-500');
+            };
+
+            recognition.onresult = (event) => {
+                let finalTranscript = '';
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    const transcript = event.results[i][0].transcript;
+                    if (event.results[i].isFinal) {
+                        finalTranscript += transcript + ' ';
+                    }
+                }
+                if (finalTranscript) {
+                    const textarea = document.getElementById('audioTranscription');
+                    textarea.value += finalTranscript;
+                    document.getElementById('transcriptionResult').classList.remove('hidden');
+                    updateSummary();
+                }
+            };
+
+            recognition.onerror = (event) => {
+                console.error('Erro no reconhecimento:', event.error);
+                stopRecording();
+            };
+
+            recognition.onend = () => {
+                stopRecording();
+            };
+        }
+
+        function stopRecording() {
+            isRecording = false;
+            document.getElementById('recordBtn').classList.remove('pulse-ring');
+            document.getElementById('recordBtn').textContent = 'Iniciar Gravação';
+            document.querySelector('#recordingStatus i').classList.remove('text-red-500');
+        }
+
+        document.getElementById('recordBtn').addEventListener('click', () => {
+            if (!recognition) {
+                alert('Seu navegador não suporta gravação de áudio. Use Chrome ou Edge.');
+                return;
+            }
+
+            if (isRecording) {
+                recognition.stop();
+            } else {
+                recognition.start();
+            }
+        });
+
+        // Auto Summary Preview
+        function updateSummary() {
+            const texto = document.getElementById('descricaoTexto').value || document.getElementById('audioTranscription').value;
+            const tipo = selectedType;
+            const eixo = document.getElementById('eixoTematico').value;
+
+            if (texto.length > 20 && tipo) {
+                const summary = `${tipo} no eixo ${eixo || 'a definir'}: ${texto.substring(0, 100)}${texto.length > 100 ? '...' : ''}`;
+                document.getElementById('summaryText').textContent = summary;
+                document.getElementById('summaryField').classList.remove('hidden');
+            }
+        }
+
+        document.getElementById('descricaoTexto').addEventListener('input', updateSummary);
+        document.getElementById('audioTranscription').addEventListener('input', updateSummary);
+        document.getElementById('eixoTematico').addEventListener('change', updateSummary);
+
+        // GPS Location
+        document.getElementById('getLocationBtn').addEventListener('click', () => {
+            const btn = document.getElementById('getLocationBtn');
+            const btnText = document.getElementById('locationBtnText');
+
+            if (navigator.geolocation) {
+                btnText.textContent = 'Obtendo...';
+                btn.disabled = true;
+
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        document.getElementById('latitude').value = position.coords.latitude;
+                        document.getElementById('longitude').value = position.coords.longitude;
+                        btnText.textContent = '✓ Localização obtida';
+                        btn.classList.add('bg-green-50', 'border-green-500', 'text-green-700');
+                        btn.disabled = false;
+                    },
+                    (error) => {
+                        alert('Não foi possível obter sua localização. Verifique as permissões do navegador.');
+                        btnText.textContent = 'Usar GPS';
+                        btn.disabled = false;
+                    }
+                );
+            } else {
+                alert('Geolocalização não suportada pelo navegador.');
+            }
+        });
+
+        // Form Submit
+        document.getElementById('contributionForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            if (!selectedType) {
+                alert('Por favor, selecione o tipo de contribuição.');
+                return;
+            }
+
+            const modo = document.querySelector('input[name="modoContribuicao"]:checked').value;
+            const descricao = modo === 'texto'
+                ? document.getElementById('descricaoTexto').value
+                : document.getElementById('audioTranscription').value;
+
+            if (!descricao || descricao.length < 10) {
+                alert('Por favor, descreva sua contribuição com mais detalhes (mínimo 10 caracteres).');
+                return;
+            }
+
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Enviando...';
+
+            const formData = {
+                tipo: selectedType,
+                modo: modo,
+                descricao: descricao,
+                eixo: document.getElementById('eixoTematico').value,
+                bairro: document.getElementById('bairro').value,
+                latitude: document.getElementById('latitude').value,
+                longitude: document.getElementById('longitude').value,
+                nome: document.getElementById('nome').value,
+                instituicao: document.getElementById('instituicao').value,
+                timestamp: new Date().toISOString()
+            };
+
+            try {
+                const response = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                document.getElementById('successModal').classList.remove('hidden');
+                document.getElementById('contributionForm').reset();
+                document.querySelectorAll('.type-btn div').forEach(d => {
+                    d.classList.remove('border-green-500', 'bg-green-50');
+                    d.classList.add('border-gray-200');
+                });
+                document.getElementById('summaryField').classList.add('hidden');
+                updateCounters();
+
+            } catch (error) {
+                alert('Erro ao enviar contribuição. Tente novamente.');
+                console.error(error);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Enviar Contribuição';
+            }
+        });
+
+        // Update Counters
+        async function updateCounters() {
+            try {
+                const response = await fetch(GOOGLE_SCRIPT_URL + '?action=getStats');
+                const data = await response.json();
+
+                document.getElementById('totalContribuicoes').textContent = data.total || 0;
+                document.getElementById('count-economia').textContent = data['Desenvolvimento Econômico'] || 0;
+                document.getElementById('count-educacao').textContent = data['Educação e Cultura'] || 0;
+                document.getElementById('count-saude').textContent = data['Saúde e Bem-estar'] || 0;
+                document.getElementById('count-infra').textContent = data['Infraestrutura e Mobilidade'] || 0;
+                document.getElementById('count-meio').textContent = data['Meio Ambiente'] || 0;
+                document.getElementById('count-tech').textContent = data['Inovação e Tecnologia'] || 0;
+            } catch (error) {
+                console.error('Erro ao carregar estatísticas:', error);
+            }
+        }
+
+        updateCounters();
+
+        // Modals
+        document.getElementById('helpTypeBtn').addEventListener('click', () => {
+            document.getElementById('helpModal').classList.remove('hidden');
+        });
+
+        document.getElementById('adminBtn').addEventListener('click', () => {
+            document.getElementById('adminModal').classList.remove('hidden');
+        });
+
+        document.querySelectorAll('.closeModal').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('#helpModal, #adminModal, #successModal').forEach(modal => {
+                    modal.classList.add('hidden');
+                });
+            });
+        });
+
+        // Admin Login
+        document.getElementById('adminLoginForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const user = document.getElementById('adminUser').value;
+            const pass = document.getElementById('adminPass').value;
+
+            if (user === 'admin' && pass === 'Obs@27072017') {
+                alert('Login realizado! Acesso ao painel administrativo.');
+                document.getElementById('adminModal').classList.add('hidden');
+            } else {
+                document.getElementById('loginError').classList.remove('hidden');
+            }
+        });
+
+        // Close modals on backdrop click
+        document.querySelectorAll('#helpModal, #adminModal, #successModal').forEach(modal => {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.classList.add('hidden');
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>
