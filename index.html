@@ -191,1668 +191,1289 @@
   }
 })();</script>
 <script>window.Intl=window.Intl||{};Intl.t=function(s){return(Intl._locale&&Intl._locale[s])||s;};</script>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Observatório Agenda 2040 – São Borja</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --primary: #2E7D32;
-    --primary-dark: #1B5E20;
-    --primary-light: #66BB6A;
-    --primary-grad: linear-gradient(135deg, #1B5E20 0%, #4CAF50 100%);
-    --btn-grad: linear-gradient(135deg, #2E7D32 0%, #4CAF50 100%);
-    --white: #FFFFFF;
-    --bg-light: #FAFAFA;
-    --text: #212121;
-    --text-light: #616161;
-    --border: #E0E0E0;
-    --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-    --shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.12);
-    --radius: 16px;
-    --red: #E53935;
-    --blue: #1E88E5;
-    --amber: #FB8C00;
-    --toast-success: #43A047;
-    --toast-error: #E53935;
-  }
-
-  [data-theme="dark"] {
-    --white: #1E1E1E;
-    --bg-light: #121212;
-    --text: #F5F5F5;
-    --text-light: #BDBDBD;
-    --border: #2C2C2C;
-    --shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-    --shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.4);
-  }
-
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
-
-  html {
-    scroll-behavior: smooth;
-  }
-
-  body {
-    font-family: 'Inter', sans-serif;
-    background: var(--bg-light);
-    color: var(--text);
-    line-height: 1.6;
-    transition: background 0.3s ease, color 0.3s ease;
-  }
-
-  h1, h2, h3, h4, h5 {
-    font-family: 'Poppins', sans-serif;
-    font-weight: 700;
-    line-height: 1.2;
-  }
-
-  .container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
-  }
-
-  /* Animations */
-  @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
-
-  @keyframes slideUp {
-    from { transform: translateY(30px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-  }
-
-  @keyframes slideDown {
-    from { transform: translateY(-20px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-  }
-
-  @keyframes pulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-  }
-
-  @keyframes checkmark {
-    0% { stroke-dashoffset: 50; }
-    100% { stroke-dashoffset: 0; }
-  }
-
-  @keyframes ripple {
-    to {
-      transform: scale(4);
-      opacity: 0;
-    }
-  }
-
-  .fade-in { animation: fadeIn 0.6s ease forwards; }
-  .slide-up { animation: slideUp 0.6s ease forwards; }
-
-  /* Header */
-  .header {
-    position: sticky;
-    top: 0;
-    background: var(--white);
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-    z-index: 100;
-    transition: background 0.3s ease;
-  }
-
-  .header-content {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 16px 0;
-  }
-
-  .logo {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-family: 'Poppins', sans-serif;
-    font-weight: 700;
-    font-size: 1.25rem;
-    color: var(--primary);
-  }
-
-  .theme-toggle {
-    background: var(--bg-light);
-    border: 1px solid var(--border);
-    border-radius: 50px;
-    padding: 8px 16px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 14px;
-    color: var(--text);
-    transition: all 0.3s ease;
-  }
-
-  .theme-toggle:hover {
-    background: var(--primary-light);
-    color: var(--white);
-  }
-
-  /* Hero */
-  .hero {
-    background: var(--primary-grad);
-    color: var(--white);
-    padding: 80px 0 100px;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .hero::after {
-    content: '';
-    position: absolute;
-    bottom: -1px;
-    left: 0;
-    right: 0;
-    height: 60px;
-    background: var(--bg-light);
-    clip-path: ellipse(50% 100% at 50% 100%);
-  }
-
-  .hero-content {
-    display: grid;
-    grid-template-columns: 1.2fr 0.8fr;
-    gap: 40px;
-    align-items: center;
-    position: relative;
-    z-index: 2;
-  }
-
-  .hero-text h1 {
-    font-size: 3rem;
-    font-weight: 800;
-    margin-bottom: 16px;
-    animation: slideUp 0.8s ease forwards;
-  }
-
-  .hero-text p {
-    font-size: 1.25rem;
-    opacity: 0.95;
-    margin-bottom: 32px;
-    animation: slideUp 0.8s 0.2s ease forwards;
-    opacity: 0;
-  }
-
-  .hero-cta {
-    animation: slideUp 0.8s 0.4s ease forwards;
-    opacity: 0;
-  }
-
-  .hero-illustration {
-    animation: fadeIn 1s 0.5s ease forwards;
-    opacity: 0;
-  }
-
-  /* Impact Counter */
-  .impact {
-    background: var(--white);
-    border-radius: var(--radius);
-    padding: 32px;
-    box-shadow: var(--shadow);
-    text-align: center;
-    margin-top: -60px;
-    position: relative;
-    z-index: 10;
-    animation: slideUp 0.8s ease forwards;
-  }
-
-  .impact h3 {
-    color: var(--primary);
-    font-size: 1.5rem;
-    margin-bottom: 16px;
-  }
-
-  .counter {
-    font-family: 'Poppins', sans-serif;
-    font-size: 3.5rem;
-    font-weight: 800;
-    color: var(--primary);
-    margin-bottom: 8px;
-  }
-
-  .counter-label {
-    color: var(--text-light);
-    font-size: 1rem;
-  }
-
-  /* Como Funciona */
-  .how-it-works {
-    padding: 80px 0 40px;
-  }
-
-  .section-title {
-    text-align: center;
-    font-size: 2.25rem;
-    margin-bottom: 16px;
-    color: var(--text);
-  }
-
-  .section-subtitle {
-    text-align: center;
-    color: var(--text-light);
-    margin-bottom: 48px;
-    font-size: 1.1rem;
-  }
-
-  .steps {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 24px;
-  }
-
-  .step-card {
-    background: var(--white);
-    border-radius: var(--radius);
-    padding: 32px 24px;
-    text-align: center;
-    box-shadow: var(--shadow);
-    transition: all 0.3s ease;
-  }
-
-  .step-card:hover {
-    transform: translateY(-8px);
-    box-shadow: var(--shadow-hover);
-  }
-
-  .step-icon {
-    width: 80px;
-    height: 80px;
-    margin: 0 auto 20px;
-    background: var(--bg-light);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .step-number {
-    display: inline-block;
-    background: var(--primary);
-    color: var(--white);
-    border-radius: 50px;
-    padding: 4px 12px;
-    font-size: 0.875rem;
-    font-weight: 600;
-    margin-bottom: 12px;
-  }
-
-  /* Form Section */
-  .form-section {
-    padding: 60px 0;
-  }
-
-  .form-wrapper {
-    background: var(--white);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    padding: 40px;
-    max-width: 800px;
-    margin: 0 auto;
-  }
-
-  .progress-bar {
-    height: 6px;
-    background: var(--border);
-    border-radius: 10px;
-    margin-bottom: 32px;
-    overflow: hidden;
-  }
-
-  .progress-fill {
-    height: 100%;
-    background: var(--btn-grad);
-    width: 0%;
-    transition: width 0.4s ease;
-    border-radius: 10px;
-  }
-
-  .form-group {
-    margin-bottom: 24px;
-  }
-
-  .form-label {
-    display: block;
-    font-weight: 600;
-    margin-bottom: 12px;
-    font-size: 1rem;
-  }
-
-  .type-cards {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
-  }
-
-  .type-card {
-    border: 2px solid var(--border);
-    border-radius: var(--radius);
-    padding: 20px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    position: relative;
-    text-align: center;
-  }
-
-  .type-card:hover {
-    border-color: var(--primary-light);
-    transform: translateY(-4px);
-    box-shadow: var(--shadow);
-  }
-
-  .type-card.selected {
-    border-color: var(--primary);
-    background: rgba(76, 175, 80, 0.05);
-  }
-
-  .type-icon {
-    width: 48px;
-    height: 48px;
-    margin: 0 auto 12px;
-  }
-
-  .info-btn {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    background: var(--bg-light);
-    border: none;
-    border-radius: 50%;
-    width: 24px;
-    height: 24px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 14px;
-    transition: all 0.2s ease;
-  }
-
-  .info-btn:hover {
-    background: var(--primary-light);
-    color: var(--white);
-  }
-
-  .input-mode {
-    display: flex;
-    gap: 12px;
-    margin-bottom: 16px;
-  }
-
-  .mode-btn {
-    flex: 1;
-    padding: 12px;
-    border: 2px solid var(--border);
-    background: var(--white);
-    border-radius: 12px;
-    cursor: pointer;
-    font-weight: 500;
-    transition: all 0.3s ease;
-    color: var(--text);
-  }
-
-  .mode-btn.active {
-    border-color: var(--primary);
-    background: var(--primary);
-    color: var(--white);
-  }
-
-  textarea {
-    width: 100%;
-    padding: 16px;
-    border: 2px solid var(--border);
-    border-radius: 12px;
-    font-family: 'Inter', sans-serif;
-    font-size: 1rem;
-    resize: vertical;
-    min-height: 120px;
-    transition: border 0.3s ease;
-    background: var(--white);
-    color: var(--text);
-  }
-
-  textarea:focus {
-    outline: none;
-    border-color: var(--primary);
-  }
-
-  .audio-controls {
-    display: none;
-    gap: 12px;
-    margin-top: 16px;
-    flex-wrap: wrap;
-  }
-
-  .audio-controls.show {
-    display: flex;
-  }
-
-  select, input[type="text"] {
-    width: 100%;
-    padding: 14px 16px;
-    border: 2px solid var(--border);
-    border-radius: 12px;
-    font-family: 'Inter', sans-serif;
-    font-size: 1rem;
-    background: var(--white);
-    color: var(--text);
-    transition: border 0.3s ease;
-  }
-
-  select:focus, input[type="text"]:focus {
-    outline: none;
-    border-color: var(--primary);
-  }
-
-  .location-group {
-    display: flex;
-    gap: 12px;
-  }
-
-  .location-group input {
-    flex: 1;
-  }
-
-  .btn {
-    position: relative;
-    padding: 14px 28px;
-    border: none;
-    border-radius: 12px;
-    font-family: 'Poppins', sans-serif;
-    font-weight: 600;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    overflow: hidden;
-  }
-
-  .btn-primary {
-    background: var(--btn-grad);
-    color: var(--white);
-    width: 100%;
-  }
-
-  .btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(46, 125, 50, 0.4);
-  }
-
-  .btn-secondary {
-    background: var(--bg-light);
-    color: var(--text);
-    border: 1px solid var(--border);
-  }
-
-  .btn-secondary:hover {
-    background: var(--border);
-  }
-
-  .ripple {
-    position: absolute;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.6);
-    transform: scale(0);
-    animation: ripple 0.6s linear;
-    pointer-events: none;
-  }
-
-  /* Modal */
-  .modal {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(8px);
-    z-index: 1000;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    animation: fadeIn 0.3s ease;
-  }
-
-  .modal.show {
-    display: flex;
-  }
-
-  .modal-content {
-    background: var(--white);
-    border-radius: var(--radius);
-    max-width: 600px;
-    width: 100%;
-    max-height: 90vh;
-    overflow-y: auto;
-    padding: 40px;
-    position: relative;
-    animation: slideDown 0.3s ease;
-  }
-
-  .modal-close {
-    position: absolute;
-    top: 16px;
-    right: 16px;
-    background: var(--bg-light);
-    border: none;
-    border-radius: 50%;
-    width: 36px;
-    height: 36px;
-    cursor: pointer;
-    font-size: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s ease;
-  }
-
-  .modal-close:hover {
-    background: var(--border);
-    transform: rotate(90deg);
-  }
-
-  /* Success Animation */
-  .success-modal {
-    text-align: center;
-  }
-
-  .success-check {
-    width: 100px;
-    height: 100px;
-    margin: 0 auto 24px;
-  }
-
-  .success-check circle {
-    stroke: var(--primary);
-    stroke-width: 3;
-    fill: none;
-    animation: fadeIn 0.3s ease;
-  }
-
-  .success-check path {
-    stroke: var(--primary);
-    stroke-width: 4;
-    fill: none;
-    stroke-dasharray: 50;
-    stroke-dashoffset: 50;
-    animation: checkmark 0.5s 0.3s ease forwards;
-  }
-
-  /* Dashboard */
-  .dashboard {
-    padding: 60px 0;
-    background: var(--white);
-  }
-
-  .dashboard-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 32px;
-    flex-wrap: wrap;
-    gap: 16px;
-  }
-
-  .filter-select {
-    min-width: 200px;
-  }
-
-  .word-cloud {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    margin-bottom: 40px;
-    justify-content: center;
-  }
-
-  .word-tag {
-    background: var(--bg-light);
-    padding: 8px 16px;
-    border-radius: 50px;
-    font-size: 0.875rem;
-    transition: all 0.3s ease;
-  }
-
-  .word-tag:hover {
-    background: var(--primary-light);
-    color: var(--white);
-    transform: scale(1.05);
-  }
-
-  .contributions-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 24px;
-  }
-
-  .contribution-card {
-    background: var(--bg-light);
-    border-radius: var(--radius);
-    padding: 24px;
-    box-shadow: var(--shadow);
-    transition: all 0.3s ease;
-    border-left: 4px solid var(--primary);
-  }
-
-  .contribution-card:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-hover);
-  }
-
-  .contribution-card.problema { border-left-color: var(--red); }
-  .contribution-card.ideia { border-left-color: var(--blue); }
-  .contribution-card.oportunidade { border-left-color: var(--amber); }
-
-  .badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 12px;
-    border-radius: 50px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    margin-bottom: 12px;
-  }
-
-  .badge-problema { background: rgba(229, 57, 53, 0.15); color: var(--red); }
-  .badge-ideia { background: rgba(30, 136, 229, 0.15); color: var(--blue); }
-  .badge-oportunidade { background: rgba(251, 140, 0, 0.15); color: var(--amber); }
-
-  .contribution-meta {
-    display: flex;
-    gap: 16px;
-    margin-top: 16px;
-    padding-top: 16px;
-    border-top: 1px solid var(--border);
-    font-size: 0.875rem;
-    color: var(--text-light);
-    flex-wrap: wrap;
-  }
-
-  /* Skeleton */
-  .skeleton {
-    background: linear-gradient(90deg, var(--border) 25%, var(--bg-light) 50%, var(--border) 75%);
-    background-size: 200% 100%;
-    animation: loading 1.5s infinite;
-    border-radius: 8px;
-  }
-
-  @keyframes loading {
-    0% { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
-  }
-
-  /* Toast */
-  .toast-container {
-    position: fixed;
-    bottom: 24px;
-    right: 24px;
-    z-index: 2000;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  .toast {
-    background: var(--white);
-    border-radius: 12px;
-    padding: 16px 20px;
-    box-shadow: var(--shadow-hover);
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    min-width: 300px;
-    animation: slideUp 0.3s ease;
-  }
-
-  .toast.success { border-left: 4px solid var(--toast-success); }
-  .toast.error { border-left: 4px solid var(--toast-error); }
-
-  /* Footer */
-  .footer {
-    background: var(--primary-dark);
-    color: var(--white);
-    padding: 40px 0;
-    text-align: center;
-    margin-top: 60px;
-  }
-
-  .footer-logo {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    font-family: 'Poppins', sans-serif;
-    font-size: 1.25rem;
-    font-weight: 700;
-    margin-bottom: 12px;
-  }
-
-  /* Responsive */
-  @media (max-width: 968px) {
-    .hero-content {
-      grid-template-columns: 1fr;
-      text-align: center;
-    }
-
-    .hero-text h1 {
-      font-size: 2.25rem;
-    }
-
-    .steps {
-      grid-template-columns: 1fr;
-    }
-
-    .type-cards {
-      grid-template-columns: 1fr;
-    }
-  }
-
-  @media (max-width: 640px) {
-    .form-wrapper {
-      padding: 24px 20px;
-    }
-
-    .modal-content {
-      padding: 24px;
-    }
-
-    .dashboard-header {
-      flex-direction: column;
-      align-items: stretch;
-    }
-
-    .contributions-grid {
-      grid-template-columns: 1fr;
-    }
-
-    .toast {
-      min-width: auto;
-      right: 12px;
-      left: 12px;
-    }
-  }
-
-  .hidden { display: none !important; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Observatório Agenda 2040 – São Borja</title>
+    
+    <!--
+    ====================================================================
+    README - OBSERVATÓRIO AGENDA 2040 SÃO BORJA
+    ====================================================================
+    
+    DESCRIÇÃO:
+    Plataforma colaborativa para coleta de problemas, ideias e oportunidades
+    para o planejamento estratégico de São Borja até 2040.
+    
+    CONFIGURAÇÃO DO GOOGLE SHEETS:
+    
+    PASSO 1 - CRIAR PLANILHA:
+    1. Acesse sheets.google.com e crie uma nova planilha
+    2. Renomeie para "Observatorio Agenda 2040 - Dados"
+    3. Na linha 1, adicione os cabeçalhos: 
+       DataHora | Tipo | Conteudo | AudioBase64 | Eixo | EixoSugerido | Bairro | Latitude | Longitude | Nome | Instituicao | UserAgent
+    
+    PASSO 2 - CRIAR GOOGLE APPS SCRIPT:
+    1. Na planilha: Extensões > Apps Script
+    2. Apague o código padrão e cole o código da seção "CÓDIGO GOOGLE APPS SCRIPT" abaixo
+    3. Salve o projeto com nome "API Observatorio Agenda 2040"
+    
+    PASSO 3 - PUBLICAR COMO WEB APP:
+    1. Clique em Implantar > Nova implantação
+    2. Tipo: Web app
+    3. Descrição: v1
+    4. Executar como: Eu
+    5. Quem pode acessar: Qualquer pessoa
+    6. Clique em Implantar > Autorizar acesso > Permitir
+    7. COPIE A URL DO WEB APP GERADA
+    
+    PASSO 4 - CONFIGURAR O SITE:
+    1. Abra este arquivo index.html
+    2. Localize a variável GOOGLE_SCRIPT_URL no JavaScript
+    3. Cole a URL copiada do Passo 3
+    4. Salve o arquivo
+    
+    PASSO 5 - PUBLICAR NO GITHUB PAGES:
+    1. Crie um repositório no GitHub
+    2. Faça upload do index.html
+    3. Settings > Pages > Branch: main > /root > Save
+    4. Acesse: https://seuusuario.github.io/nome-do-repo
+    
+    LGPD: Os dados coletados são usados exclusivamente para planejamento da Agenda 2040.
+    Áudio é convertido para Base64 e pode ser processado posteriormente para arquivo Drive.
+    
+    ====================================================================
+    -->
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700;800&display=swap');
+        
+        :root {
+            --primary: #2E7D32;
+            --primary-dark: #1B5E20;
+            --primary-light: #4CAF50;
+            --accent: #66BB6A;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        h1, h2, h3, h4 {
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        .hero-gradient {
+            background: linear-gradient(135deg, #2E7D32 0%, #1B5E20 50%, #0D47A1 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero-gradient::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="2" fill="rgba(255,255,255,0.1)"/></svg>');
+            animation: float 20s linear infinite;
+        }
+        
+        @keyframes float {
+            from { transform: translateY(0); }
+            to { transform: translateY(-100px); }
+        }
+        
+        .card-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover:not(:disabled) {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -5px rgba(46, 125, 50, 0.4);
+        }
+        
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .pulse-recording {
+            animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .word-cloud span {
+            display: inline-block;
+            padding: 4px 12px;
+            margin: 4px;
+            border-radius: 20px;
+            background: linear-gradient(135deg, #E8F5E9, #C8E6C9);
+            color: var(--primary-dark);
+            font-weight: 500;
+            transition: all 0.2s;
+            cursor: default;
+        }
+        
+        .word-cloud span:hover {
+            transform: scale(1.1);
+            background: linear-gradient(135deg, #C8E6C9, #A5D6A7);
+        }
+        
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(400px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 9998;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .modal.active {
+            display: flex;
+            animation: fadeIn 0.2s;
+        }
+        
+        .dark {
+            background: #0f172a;
+            color: #f1f5f9;
+        }
+        
+        .dark .bg-white { background: #1e293b !important; }
+        .dark .text-gray-900 { color: #f1f5f9 !important; }
+        .dark .text-gray-700 { color: #cbd5e1 !important; }
+        .dark .text-gray-600 { color: #94a3b8 !important; }
+        .dark .border-gray-200 { border-color: #334155 !important; }
+        .dark .bg-gray-50 { background: #0f172a !important; }
+        .dark .bg-gray-100 { background: #1e293b !important; }
+    </style>
 </head>
-<body>
-
-<!-- Header -->
-<header class="header">
-  <div class="container">
-    <div class="header-content">
-      <div class="logo">
-        <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-          <circle cx="16" cy="16" r="16" fill="url(#logoGrad)"/>
-          <path d="M16 8L20 16H12L16 8Z" fill="white"/>
-          <path d="M10 20H22V22H10V20Z" fill="white"/>
-          <defs>
-            <linearGradient id="logoGrad" x1="0" y1="0" x2="32" y2="32">
-              <stop stop-color="#1B5E20"/>
-              <stop offset="1" stop-color="#4CAF50"/>
-            </linearGradient>
-          </defs>
-        </svg>
-        Observatório Agenda 2040
-      </div>
-      <button class="theme-toggle" id="themeToggle" aria-label="Alternar modo escuro">
-        <span id="themeIcon">🌙</span>
-        <span id="themeText">Modo Escuro</span>
-      </button>
-    </div>
-  </div>
-</header>
-
-<!-- Hero -->
-<section class="hero">
-  <div class="container">
-    <div class="hero-content">
-      <div class="hero-text">
-        <h1>Ajude a construir o futuro da nossa cidade</h1>
-        <p>Não precisa escrever perfeito. Escreva como você fala.</p>
-        <div class="hero-cta">
-          <button class="btn btn-primary" onclick="document.getElementById('formSection').scrollIntoView()">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M12 5v14M5 12h14"/>
-            </svg>
-            Fazer minha contribuição
-          </button>
-        </div>
-      </div>
-      <div class="hero-illustration">
-        <svg viewBox="0 0 400 300" fill="none">
-          <circle cx="200" cy="150" r="120" fill="rgba(255,255,255,0.1)"/>
-          <path d="M100 180H300V220H100V180Z" fill="rgba(255,255,255,0.2)"/>
-          <rect x="140" y="100" width="40" height="80" fill="white" opacity="0.9"/>
-          <rect x="190" y="80" width="40" height="100" fill="white" opacity="0.9"/>
-          <rect x="240" y="120" width="40" height="60" fill="white" opacity="0.9"/>
-          <circle cx="160" cy="120" r="8" fill="#66BB6A"/>
-          <circle cx="210" cy="100" r="8" fill="#66BB6A"/>
-          <circle cx="260" cy="140" r="8" fill="#66BB6A"/>
-          <path d="M150 250C150 230 170 220 200 220C230 220 250 230 250 250" stroke="white" stroke-width="3" stroke-linecap="round"/>
-        </svg>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- Impact Counter -->
-<section class="container">
-  <div class="impact">
-    <h3>Sua voz constrói o futuro</h3>
-    <div class="counter" id="counter">0</div>
-    <p class="counter-label">contribuições já recebidas</p>
-  </div>
-</section>
-
-<!-- Como Funciona -->
-<section class="how-it-works">
-  <div class="container">
-    <h2 class="section-title">Como funciona</h2>
-    <p class="section-subtitle">Participar é simples e leva menos de 2 minutos</p>
-    <div class="steps">
-      <div class="step-card">
-        <div class="step-icon">
-          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#2E7D32" stroke-width="2">
-            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-          </svg>
-        </div>
-        <span class="step-number">Passo 1</span>
-        <h3>Escolha o tipo</h3>
-        <p>Informe se é um problema, uma ideia ou uma oportunidade que você vê para São Borja.</p>
-      </div>
-      <div class="step-card">
-        <div class="step-icon">
-          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#2E7D32" stroke-width="2">
-            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
-            <path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/>
-          </svg>
-        </div>
-        <span class="step-number">Passo 2</span>
-        <h3>Compartilhe</h3>
-        <p>Escreva ou grave um áudio contando sobre o assunto. Fale do seu jeito, sem formalidade.</p>
-      </div>
-      <div class="step-card">
-        <div class="step-icon">
-          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#2E7D32" stroke-width="2">
-            <polyline points="20 6 9 17 4 12"/>
-          </svg>
-        </div>
-        <span class="step-number">Passo 3</span>
-        <h3>Envie</h3>
-        <p>Pronto! Sua contribuição será analisada e ajudará a planejar São Borja rumo a 2040.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- Form Section -->
-<section class="form-section" id="formSection">
-  <div class="container">
-    <div class="form-wrapper">
-      <div class="progress-bar">
-        <div class="progress-fill" id="progressFill"></div>
-      </div>
-
-      <form id="contributionForm">
-        <!-- Tipo -->
-        <div class="form-group">
-          <label class="form-label">1. Qual tipo de contribuição você quer fazer?</label>
-          <div class="type-cards">
-            <div class="type-card" data-type="problema" tabindex="0">
-              <button type="button" class="info-btn" data-info="problema" aria-label="Mais informações sobre Problema">ℹ️</button>
-              <svg class="type-icon" viewBox="0 0 48 48" fill="none">
-                <circle cx="24" cy="24" r="22" fill="#FFEBEE"/>
-                <path d="M24 14v12M24 32v2" stroke="#E53935" stroke-width="3" stroke-linecap="round"/>
-              </svg>
-              <h4>Problema</h4>
-              <p style="font-size: 0.875rem; color: var(--text-light);">Algo que precisa melhorar</p>
-            </div>
-            <div class="type-card" data-type="ideia" tabindex="0">
-              <button type="button" class="info-btn" data-info="ideia" aria-label="Mais informações sobre Ideia">ℹ️</button>
-              <svg class="type-icon" viewBox="0 0 48 48" fill="none">
-                <circle cx="24" cy="24" r="22" fill="#E3F2FD"/>
-                <path d="M24 30V16M18 22h12" stroke="#1E88E5" stroke-width="3" stroke-linecap="round"/>
-              </svg>
-              <h4>Ideia</h4>
-              <p style="font-size: 0.875rem; color: var(--text-light);">Sugestão para a cidade</p>
-            </div>
-            <div class="type-card" data-type="oportunidade" tabindex="0">
-              <button type="button" class="info-btn" data-info="oportunidade" aria-label="Mais informações sobre Oportunidade">ℹ️</button>
-              <svg class="type-icon" viewBox="0 0 48 48" fill="none">
-                <circle cx="24" cy="24" r="22" fill="#FFF3E0"/>
-                <path d="M18 30l6-12 6 12M21 26h6" stroke="#FB8C00" stroke-width="3" stroke-linecap="round"/>
-              </svg>
-              <h4>Oportunidade</h4>
-              <p style="font-size: 0.875rem; color: var(--text-light);">Potencial a aproveitar</p>
-            </div>
-          <input type="hidden" id="tipoContribuicao" required>
-        </div>
-
-        <!-- Conteúdo -->
-        <div class="form-group">
-          <label class="form-label">2. Descreva sua contribuição</label>
-          <div class="input-mode">
-            <button type="button" class="mode-btn active" data-mode="texto">✍️ Escrever</button>
-            <button type="button" class="mode-btn" data-mode="audio">🎤 Gravar Áudio</button>
-          </div>
-          <div id="textInput">
-            <textarea id="mensagem" placeholder="Conte aqui com suas palavras..." required></textarea>
-          </div>
-          <div class="audio-controls" id="audioInput">
-            <button type="button" class="btn btn-secondary" id="btnGravar">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="8"/></svg>
-              Gravar
-            </button>
-            <button type="button" class="btn btn-secondary hidden" id="btnParar">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12"/></svg>
-              Parar
-            </button>
-            <button type="button" class="btn btn-secondary hidden" id="btnOuvir">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-              Ouvir
-            </button>
-            <span id="audioStatus" style="color: var(--text-light); align-self: center;"></span>
-          </div>
-        </div>
-
-        <!-- Eixo Temático -->
-        <div class="form-group">
-          <label class="form-label" for="eixo">3. Sobre qual tema é sua contribuição?</label>
-          <select id="eixo" required>
-            <option value="">Selecione um eixo temático</option>
-            <option value="desenvolvimento_economico">🏭 Desenvolvimento Econômico</option>
-            <option value="educacao">📚 Educação</option>
-            <option value="saude">❤️ Saúde</option>
-            <option value="meio_ambiente">🌳 Meio Ambiente</option>
-            <option value="mobilidade">🚌 Mobilidade Urbana</option>
-            <option value="cultura">🎭 Cultura e Turismo</option>
-            <option value="seguranca">🛡️ Segurança</option>
-            <option value="infraestrutura">🏗️ Infraestrutura</option>
-            <option value="social">🤝 Desenvolvimento Social</option>
-            <option value="tecnologia">💻 Tecnologia e Inovação</option>
-          </select>
-        </div>
-
-        <!-- Localização -->
-        <div class="form-group">
-          <label class="form-label" for="localizacao">4. Onde fica? (bairro, rua ou região)</label>
-          <div class="location-group">
-            <input type="text" id="localizacao" placeholder="Ex: Centro, Bairro do Passo, Rua das Flores...">
-            <button type="button" class="btn btn-secondary" id="btnGps">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="3"/><path d="M12 2v6M12 16v6M2 12h6M16 12h6"/>
-              </svg>
-              GPS
-            </button>
-          </div>
-        </div>
-
-        <!-- Opcionais -->
-        <div class="form-group">
-          <label class="form-label" for="nome">5. Quer se identificar? (opcional)</label>
-          <input type="text" id="nome" placeholder="Seu nome">
-        </div>
-
-        <div class="form-group">
-          <label class="form-label" for="instituicao">Representa alguma instituição? (opcional)</label>
-          <input type="text" id="instituicao" placeholder="Ex: Associação de Moradores, Escola, Empresa...">
-        </div>
-
-        <button type="submit" class="btn btn-primary">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M22 2L11 13M22 2l-7 20-4-9-4 20-7z"/>
-          </svg>
-          Enviar contribuição
-        </button>
-      </form>
-    </div>
-  </div>
-</section>
-
-<!-- Dashboard -->
-<section class="dashboard">
-  <div class="container">
-    <h2 class="section-title">Contribuições da Comunidade</h2>
-    <p class="section-subtitle">Veja o que outros cidadãos estão sugerindo para São Borja</p>
-
-    <div class="dashboard-header">
-      <h3 id="totalExibido">Carregando...</h3>
-      <select id="filtroEixo" class="filter-select">
-        <option value="todos">Todos os eixos</option>
-        <option value="desenvolvimento_economico">🏭 Desenvolvimento Econômico</option>
-        <option value="educacao">📚 Educação</option>
-        <option value="saude">❤️ Saúde</option>
-        <option value="meio_ambiente">🌳 Meio Ambiente</option>
-        <option value="mobilidade">🚌 Mobilidade Urbana</option>
-        <option value="cultura">🎭 Cultura e Turismo</option>
-        <option value="seguranca">🛡️ Segurança</option>
-        <option value="infraestrutura">🏗️ Infraestrutura</option>
-        <option value="social">🤝 Desenvolvimento Social</option>
-        <option value="tecnologia">💻 Tecnologia e Inovação</option>
-      </select>
-    </div>
-
-    <h4 style="margin-bottom: 16px; text-align: center;">Temas mais mencionados</h4>
-    <div class="word-cloud" id="wordCloud"></div>
-
-    <div class="contributions-grid" id="contributionsGrid"></div>
-  </div>
-</section>
-
-<!-- Footer -->
-<footer class="footer">
-  <div class="container">
-    <div class="footer-logo">
-      <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-        <circle cx="16" cy="16" r="16" fill="white" opacity="0.2"/>
-        <path d="M16 8L20 16H12L16 8Z" fill="white"/>
-        <path d="M10 20H22V22H10V20Z" fill="white"/>
-      </svg>
-      Agenda 2040
-    </div>
-    <p>São Borja rumo a 2040</p>
-    <p style="margin-top: 16px; opacity: 0.7; font-size: 0.875rem;">Construindo juntos o futuro da nossa cidade</p>
-  </div>
-</footer>
-
-<!-- Modais Informativas -->
-<div class="modal" id="modalInfo">
-  <div class="modal-content">
-    <button class="modal-close" onclick="closeModal('modalInfo')">×</button>
-    <div id="modalInfoContent"></div>
-  </div>
-</div>
-
-<!-- Modal Sucesso -->
-<div class="modal" id="modalSuccess">
-  <div class="modal-content success-modal">
-    <svg class="success-check" viewBox="0 0 100 100">
-      <circle cx="50" cy="50" r="45"/>
-      <path d="M30 50l15 15 25-30"/>
-    </svg>
-    <h2 style="color: var(--primary); margin-bottom: 16px;">Obrigado pela sua contribuição!</h2>
-    <p style="margin-bottom: 24px; color: var(--text-light);">Sua voz é fundamental para construirmos juntos o futuro de São Borja. Nossa equipe irá analisar sua sugestão.</p>
-    <button class="btn btn-primary" onclick="closeModal('modalSuccess')">Fechar</button>
-  </div>
-</div>
-
-<!-- Toast Container -->
-<div class="toast-container" id="toastContainer"></div>
-
-<script>
-  // Estado da aplicação
-  let contributions = [];
-  let mediaRecorder = null;
-  let audioChunks = [];
-  let audioBlob = null;
-  let currentAudioURL = null;
-
-  // Keywords para sugestão automática de eixo
-  const eixoKeywords = {
-    desenvolvimento_economico: ['emprego', 'trabalho', 'empresa', 'indústria', 'comércio', 'negócio', 'renda', 'economia'],
-    educacao: ['escola', 'aluno', 'professor', 'ensino', 'creche', 'faculdade', 'estudar', 'educação'],
-    saude: ['hospital', 'posto', 'médico', 'saúde', 'consulta', 'upA', 'remédio', 'atendimento'],
-    meio_ambiente: ['lixo', 'árvore', 'rio', 'poluição', 'sustentável', 'reciclar', 'verde', 'ambiental'],
-    mobilidade: ['ônibus', 'rua', 'trânsito', 'asfalto', 'calçada', 'ciclovia', 'transporte', 'buraco'],
-    cultura: ['evento', 'festa', 'turismo', 'cultura', 'patrimônio', 'museu', 'arte', 'história'],
-    seguranca: ['polícia', 'segurança', 'crime', 'iluminação', 'guarda', 'roubo', 'violência'],
-    infraestrutura: ['água', 'esgoto', 'luz', 'energia', 'saneamento', 'obra', 'construção'],
-    social: ['idoso', 'criança', 'assistência', 'social', 'moradia', 'habitação', 'família'],
-    tecnologia: ['internet', 'wifi', 'tecnologia', 'digital', 'inovação', 'sistema', 'app']
-  };
-
-  // Informações das modais
-  const modalInfos = {
-    problema: {
-      title: '🔴 O que é um Problema?',
-      content: `
-        <svg viewBox="0 0 200 120" style="width: 100%; max-width: 300px; margin: 0 auto 20px; display: block;">
-          <rect x="40" y="40" width="120" height="60" rx="8" fill="#FFEBEE"/>
-          <path d="M100 55v20M100 85v2" stroke="#E53935" stroke-width="4" stroke-linecap="round"/>
-          <rect x="60" y="30" width="80" height="8" rx="4" fill="#E53935" opacity="0.3"/>
-        </svg>
-        <p style="margin-bottom: 16px;">Um <strong>problema</strong> é algo que afeta negativamente a qualidade de vida na cidade e precisa ser resolvido.</p>
-        <h4 style="margin: 20px 0 12px;">Exemplos reais de São Borja:</h4>
-        <ul style="line-height: 1.8;">
-          <li>Falta de iluminação na Rua das Missões, causando insegurança à noite</li>
-          <li>Buracos na avenida principal dificultando o trânsito</li>
-          <li>Demora no atendimento do posto de saúde do Bairro do Passo</li>
-          <li>Acúmulo de lixo em terrenos baldios no Centro</li>
-        </ul>
-      `
-    },
-    ideia: {
-      title: '💡 O que é uma Ideia?',
-      content: `
-        <svg viewBox="0 0 200 120" style="width: 100%; max-width: 300px; margin: 0 auto 20px; display: block;">
-          <circle cx="100" cy="60" r="35" fill="#E3F2FD"/>
-          <path d="M100 45v25M85 60h30" stroke="#1E88E5" stroke-width="4" stroke-linecap="round"/>
-          <path d="M80 80q20 10 40 0" stroke="#1E88E5" stroke-width="3" fill="none" stroke-linecap="round"/>
-        </svg>
-        <p style="margin-bottom: 16px;">Uma <strong>ideia</strong> é uma sugestão ou proposta para melhorar algo na cidade ou implementar algo novo.</p>
-        <h4 style="margin: 20px 0 12px;">Exemplos reais de São Borja:</h4>
-        <ul style="line-height: 1.8;">
-          <li>Criar uma feira de produtores locais aos domingos na Praça Central</li>
-          <li>Implantar ciclovia ligando os bairros ao Centro</li>
-          <li>Oficinas de capacitação para jovens na Casa de Cultura</li>
-          <li>App para acompanhar horários do transporte público</li>
-        </ul>
-      `
-    },
-    oportunidade: {
-      title: '📈 O que é uma Oportunidade?',
-      content: `
-        <svg viewBox="0 0 200 120" style="width: 100%; max-width: 300px; margin: 0 auto 20px; display: block;">
-          <rect x="50" y="70" width="100" height="30" rx="8" fill="#FFF3E0"/>
-          <path d="M70 70L90 40L110 55L130 30" stroke="#FB8C00" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-          <circle cx="90" cy="40" r="4" fill="#FB8C00"/>
-          <circle cx="110" cy="55" r="4" fill="#FB8C00"/>
-          <circle cx="130" cy="30" r="4" fill="#FB8C00"/>
-        </svg>
-        <p style="margin-bottom: 16px;">Uma <strong>oportunidade</strong> é um potencial existente na cidade que pode ser aproveitado para gerar desenvolvimento.</p>
-        <h4 style="margin: 20px 0 12px;">Exemplos reais de São Borja:</h4>
-        <ul style="line-height: 1.8;">
-          <li>Patrimônio histórico das Missões pode atrair mais turismo cultural</li>
-          <li>Terra fértil da região pode fortalecer a agricultura familiar</li>
-          <li>Localização estratégica na fronteira favorece o comércio internacional</li>
-          <li>Rio Uruguai tem potencial para atividades náuticas e lazer</li>
-        </ul>
-      `
-    }
-  };
-
-  // Inicialização
-  document.addEventListener('DOMContentLoaded', () => {
-    loadContributions();
-    setupEventListeners();
-    updateCounter();
-    renderDashboard();
-    checkDarkMode();
-  });
-
-  // Setup de Event Listeners
-  function setupEventListeners() {
-    // Theme toggle
-    document.getElementById('themeToggle').addEventListener('click', toggleTheme);
-
-    // Type cards
-    document.querySelectorAll('.type-card').forEach(card => {
-      card.addEventListener('click', function(e) {
-        if (!e.target.classList.contains('info-btn')) {
-          selectType(this.dataset.type);
-        }
-      });
-    });
-
-    // Info buttons
-    document.querySelectorAll('.info-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        showModalInfo(btn.dataset.info);
-      });
-    });
-
-    // Mode buttons
-    document.querySelectorAll('.mode-btn').forEach(btn => {
-      btn.addEventListener('click', () => switchInputMode(btn.dataset.mode));
-    });
-
-    // Audio buttons
-    document.getElementById('btnGravar').addEventListener('click', startRecording);
-    document.getElementById('btnParar').addEventListener('click', stopRecording);
-    document.getElementById('btnOuvir').addEventListener('click', playAudio);
-
-    // GPS
-    document.getElementById('btnGps').addEventListener('click', getLocation);
-
-    // Form
-    document.getElementById('contributionForm').addEventListener('submit', handleSubmit);
-
-    // Mensagem textarea - sugestão de eixo
-    document.getElementById('mensagem').addEventListener('input', suggestEixo);
-
-    // Filtro
-    document.getElementById('filtroEixo').addEventListener('change', renderDashboard);
-
-    // Progress
-    document.querySelectorAll('#contributionForm input, #contributionForm select, #contributionForm textarea').forEach(el => {
-      el.addEventListener('change', updateProgress);
-      el.addEventListener('input', updateProgress);
-    });
-
-    // Ripple effect
-    document.querySelectorAll('.btn').forEach(btn => {
-      btn.addEventListener('click', createRipple);
-    });
-  }
-
-  // Dark Mode
-  function checkDarkMode() {
-    const theme = localStorage.getItem('theme') || 'light';
-    if (theme === 'dark') {
-      document.documentElement.setAttribute('data-theme', 'dark');
-      document.getElementById('themeIcon').textContent = '☀️';
-      document.getElementById('themeText').textContent = 'Modo Claro';
-    }
-  }
-
-  function toggleTheme() {
-    const current = document.documentElement.getAttribute('data-theme');
-    if (current === 'dark') {
-      document.documentElement.removeAttribute('data-theme');
-      localStorage.setItem('theme', 'light');
-      document.getElementById('themeIcon').textContent = '🌙';
-      document.getElementById('themeText').textContent = 'Modo Escuro';
-    } else {
-      document.documentElement.setAttribute('data-theme', 'dark');
-      localStorage.setItem('theme', 'dark');
-      document.getElementById('themeIcon').textContent = '☀️';
-      document.getElementById('themeText').textContent = 'Modo Claro';
-    }
-  }
-
-  // Tipo de contribuição
-  function selectType(type) {
-    document.querySelectorAll('.type-card').forEach(card => {
-      card.classList.remove('selected');
-    });
-    document.querySelector(`[data-type="${type}"]`).classList.add('selected');
-    document.getElementById('tipoContribuicao').value = type;
-    updateProgress();
-    suggestPlaceholder(type);
-  }
-
-  function suggestPlaceholder(type) {
-    const placeholders = {
-      problema: 'Descreva o problema que você identificou... Ex: A rua X está com muitos buracos...',
-      ideia: 'Conte sua ideia para melhorar a cidade... Ex: Poderíamos criar uma feira de produtores...',
-      oportunidade: 'Qual potencial você vê na cidade? Ex: O patrimônio histórico poderia atrair mais turistas...'
-    };
-    document.getElementById('mensagem').placeholder = placeholders[type] || 'Conte aqui com suas palavras...';
-  }
-
-  // Modo de entrada
-  function switchInputMode(mode) {
-    document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
-    document.querySelector(`[data-mode="${mode}"]`).classList.add('active');
+<body class="bg-gray-50 text-gray-900">
     
-    if (mode === 'texto') {
-      document.getElementById('textInput').classList.remove('hidden');
-      document.getElementById('audioInput').classList.remove('show');
-      document.getElementById('mensagem').required = true;
-    } else {
-      document.getElementById('textInput').classList.add('hidden');
-      document.getElementById('audioInput').classList.add('show');
-      document.getElementById('mensagem').required = false;
-    }
+    <!-- Toast Container -->
+    <div id="toastContainer"></div>
+    
+    <!-- Header/Hero -->
+    <header class="hero-gradient text-white">
+        <nav class="container mx-auto px-4 py-6 flex justify-between items-center relative z-10">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center">
+                    <i data-lucide="target" class="w-7 h-7"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold">Agenda 2040</h1>
+                    <p class="text-xs text-white/80">São Borja</p>
+                </div>
+            </div>
+            <button id="darkModeToggle" class="p-2 rounded-lg bg-white/20 backdrop-blur-md hover:bg-white/30 transition">
+                <i data-lucide="moon" class="w-5 h-5"></i>
+            </button>
+        </nav>
+        
+        <div class="container mx-auto px-4 py-20 md:py-32 text-center relative z-10">
+            <h2 class="text-4xl md:text-6xl font-bold mb-6 animate-fade-in">
+                Observatório Agenda 2040
+            </h2>
+            <p class="text-lg md:text-xl text-white/90 max-w-3xl mx-auto mb-8 animate-fade-in" style="animation-delay: 0.1s">
+                Sua voz constrói o futuro de São Borja. Compartilhe problemas, ideias e oportunidades para transformarmos juntos nossa cidade até 2040.
+            </p>
+            <div class="flex flex-wrap gap-4 justify-center animate-fade-in" style="animation-delay: 0.2s">
+                <a href="#contribuir" class="px-8 py-4 bg-white text-green-700 rounded-xl font-semibold hover:bg-gray-100 transition shadow-xl">
+                    Fazer Contribuição
+                </a>
+                <a href="#visualizar" class="px-8 py-4 bg-white/20 backdrop-blur-md text-white rounded-xl font-semibold hover:bg-white/30 transition border-2 border-white/30">
+                    Ver Contribuições
+                </a>
+            </div>
+            
+            <div class="mt-16 grid grid-cols-3 gap-6 max-w-2xl mx-auto">
+                <div class="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
+                    <div class="text-3xl md:text-4xl font-bold" id="counterProblemas">0</div>
+                    <div class="text-sm text-white/80 mt-1">Problemas</div>
+                </div>
+                <div class="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
+                    <div class="text-3xl md:text-4xl font-bold" id="counterIdeias">0</div>
+                    <div class="text-sm text-white/80 mt-1">Ideias</div>
+                </div>
+                <div class="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
+                    <div class="text-3xl md:text-4xl font-bold" id="counterOportunidades">0</div>
+                    <div class="text-sm text-white/80 mt-1">Oportunidades</div>
+                </div>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Seção Contribuir -->
+    <section id="contribuir" class="py-16 md:py-24">
+        <div class="container mx-auto px-4">
+            <div class="max-w-4xl mx-auto">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold mb-4">Faça sua Contribuição</h2>
+                    <p class="text-gray-600 max-w-2xl mx-auto">
+                        Escolha o tipo de contribuição e compartilhe sua visão para São Borja. Você pode escrever ou gravar áudio.
+                    </p>
+                </div>
+                
+                <div class="bg-white rounded-3xl shadow-xl p-6 md:p-10 border border-gray-200">
+                    <!-- Seleção de Tipo -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                        <button type="button" data-tipo="Problema" class="tipo-btn group p-6 rounded-2xl border-2 border-gray-200 hover:border-red-400 transition card-hover">
+                            <div class="w-14 h-14 mx-auto mb-3 bg-red-100 rounded-xl flex items-center justify-center group-hover:bg-red-200 transition">
+                                <i data-lucide="alert-circle" class="w-7 h-7 text-red-600"></i>
+                            </div>
+                            <h3 class="font-semibold text-lg mb-1">Problema</h3>
+                            <p class="text-sm text-gray-600">Relate um desafio da cidade</p>
+                        </button>
+                        
+                        <button type="button" data-tipo="Ideia" class="tipo-btn group p-6 rounded-2xl border-2 border-gray-200 hover:border-blue-400 transition card-hover">
+                            <div class="w-14 h-14 mx-auto mb-3 bg-blue-100 rounded-xl flex items-center justify-center group-hover:bg-blue-200 transition">
+                                <i data-lucide="lightbulb" class="w-7 h-7 text-blue-600"></i>
+                            </div>
+                            <h3 class="font-semibold text-lg mb-1">Ideia</h3>
+                            <p class="text-sm text-gray-600">Proponha uma solução</p>
+                        </button>
+                        
+                        <button type="button" data-tipo="Oportunidade" class="tipo-btn group p-6 rounded-2xl border-2 border-gray-200 hover:border-green-400 transition card-hover">
+                            <div class="w-14 h-14 mx-auto mb-3 bg-green-100 rounded-xl flex items-center justify-center group-hover:bg-green-200 transition">
+                                <i data-lucide="trending-up" class="w-7 h-7 text-green-600"></i>
+                            </div>
+                            <h3 class="font-semibold text-lg mb-1">Oportunidade</h3>
+                            <p class="text-sm text-gray-600">Indique um potencial</p>
+                        </button>
+                    </div>
+                    
+                    <!-- Formulário -->
+                    <form id="contribuicaoForm" class="space-y-6">
+                        <input type="hidden" id="tipo" name="tipo" required>
+                        
+                        <!-- Conteúdo Texto -->
+                        <div>
+                            <label class="block text-sm font-semibold mb-2 text-gray-700">
+                                Sua contribuição <span class="text-red-500">*</span>
+                            </label>
+                            <textarea 
+                                id="conteudo" 
+                                name="conteudo" 
+                                rows="5" 
+                                class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-green-500 focus:ring-4 focus:ring-green-100 transition outline-none resize-none"
+                                placeholder="Selecione um tipo de contribuição acima..."
+                                disabled
+                            ></textarea>
+                            <p id="eixoSugerido" class="mt-2 text-sm text-green-600 font-medium hidden"></p>
+                        </div>
+                        
+                        <!-- Gravação de Áudio -->
+                        <div class="bg-gray-50 rounded-xl p-5 border border-gray-200">
+                            <div class="flex items-center justify-between mb-3">
+                                <label class="text-sm font-semibold text-gray-700">Ou grave um áudio</label>
+                                <span id="audioTimer" class="text-sm font-mono text-gray-600 hidden">00:00</span>
+                            </div>
+                            <div class="flex gap-3">
+                                <button type="button" id="btnGravar" class="flex-1 btn-primary text-white px-6 py-3 rounded-xl font-semibold flex items-center justify-center gap-2">
+                                    <i data-lucide="mic" class="w-5 h-5"></i>
+                                    <span>Gravar Áudio</span>
+                                </button>
+                                <button type="button" id="btnParar" class="hidden flex-1 bg-red-600 text-white px-6 py-3 rounded-xl font-semibold flex items-center justify-center gap-2 hover:bg-red-700 pulse-recording">
+                                    <i data-lucide="square" class="w-5 h-5"></i>
+                                    <span>Parar</span>
+                                </button>
+                            </div>
+                            <div id="audioPreview" class="hidden mt-4">
+                                <audio id="audioPlayer" controls class="w-full"></audio>
+                                <button type="button" id="btnRemoverAudio" class="mt-2 text-sm text-red-600 hover:text-red-700 font-medium">Remover áudio</button>
+                            </div>
+                        </div>
+                        
+                        <!-- Eixo Temático -->
+                        <div>
+                            <label for="eixo" class="block text-sm font-semibold mb-2 text-gray-700">
+                                Eixo Temático <span class="text-red-500">*</span>
+                            </label>
+                            <select id="eixo" name="eixo" required class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-green-500 focus:ring-4 focus:ring-green-100 transition outline-none bg-white">
+                                <option value="">Selecione um eixo</option>
+                                <option value="Desenvolvimento Econômico">Desenvolvimento Econômico</option>
+                                <option value="Infraestrutura e Mobilidade">Infraestrutura e Mobilidade</option>
+                                <option value="Saúde e Bem-estar">Saúde e Bem-estar</option>
+                                <option value="Educação e Cultura">Educação e Cultura</option>
+                                <option value="Meio Ambiente">Meio Ambiente</option>
+                                <option value="Segurança Pública">Segurança Pública</option>
+                                <option value="Tecnologia e Inovação">Tecnologia e Inovação</option>
+                                <option value="Turismo e Patrimônio">Turismo e Patrimônio</option>
+                                <option value="Gestão Pública">Gestão Pública</option>
+                                <option value="Outro">Outro</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Localização -->
+                        <div>
+                            <label class="block text-sm font-semibold mb-2 text-gray-700">Localização</label>
+                            <div class="flex gap-3">
+                                <input 
+                                    type="text" 
+                                    id="bairro" 
+                                    name="bairro" 
+                                    placeholder="Bairro ou região"
+                                    class="flex-1 px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-green-500 focus:ring-4 focus:ring-green-100 transition outline-none"
+                                >
+                                <button type="button" id="btnGPS" class="px-5 py-3 bg-gray-100 hover:bg-gray-200 rounded-xl border-2 border-gray-200 transition" title="Usar GPS">
+                                    <i data-lucide="map-pin" class="w-5 h-5 text-gray-700"></i>
+                                </button>
+                            </div>
+                            <input type="hidden" id="latitude" name="latitude">
+                            <input type="hidden" id="longitude" name="longitude">
+                        </div>
+                        
+                        <!-- Dados Opcionais -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="nome" class="block text-sm font-semibold mb-2 text-gray-700">Nome (opcional)</label>
+                                <input 
+                                    type="text" 
+                                    id="nome" 
+                                    name="nome" 
+                                    placeholder="Seu nome"
+                                    class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-green-500 focus:ring-4 focus:ring-green-100 transition outline-none"
+                                >
+                            </div>
+                            <div>
+                                <label for="instituicao" class="block text-sm font-semibold mb-2 text-gray-700">Instituição (opcional)</label>
+                                <input 
+                                    type="text" 
+                                    id="instituicao" 
+                                    name="instituicao" 
+                                    placeholder="Empresa, escola, etc"
+                                    class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-green-500 focus:ring-4 focus:ring-green-100 transition outline-none"
+                                >
+                            </div>
+                        </div>
+                        
+                        <!-- LGPD Notice -->
+                        <div class="bg-blue-50 border-2 border-blue-200 rounded-xl p-4 flex gap-3">
+                            <i data-lucide="shield-check" class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5"></i>
+                            <p class="text-sm text-blue-900">
+                                <strong>LGPD:</strong> Seus dados serão usados apenas para planejamento da Agenda 2040. Não compartilhamos informações pessoais com terceiros.
+                            </p>
+                        </div>
+                        
+                        <!-- Botão Enviar -->
+                        <button type="submit" id="btnEnviar" class="w-full btn-primary text-white px-8 py-4 rounded-xl font-semibold text-lg shadow-lg flex items-center justify-center gap-2">
+                            <i data-lucide="send" class="w-5 h-5"></i>
+                            <span>Enviar Contribuição</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Seção Visualizar -->
+    <section id="visualizar" class="py-16 md:py-24 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="max-w-6xl mx-auto">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold mb-4">Contribuições da Comunidade</h2>
+                    <p class="text-gray-600 max-w-2xl mx-auto">
+                        Explore o que a população de São Borja está pensando sobre o futuro da cidade
+                    </p>
+                </div>
+                
+                <!-- Nuvem de Palavras -->
+                <div class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-3xl p-8 mb-8 border border-green-100">
+                    <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
+                        <i data-lucide="cloud" class="w-6 h-6 text-green-600"></i>
+                        Temas em Destaque
+                    </h3>
+                    <div id="wordCloud" class="word-cloud text-center"></div>
+                </div>
+                
+                <!-- Filtros -->
+                <div class="flex flex-wrap gap-3 mb-8">
+                    <button class="filter-btn active px-5 py-2 rounded-xl bg-green-600 text-white font-medium" data-filter="todos">
+                        Todos
+                    </button>
+                    <button class="filter-btn px-5 py-2 rounded-xl bg-gray-100 text-gray-700 font-medium hover:bg-gray-200" data-filter="Problema">
+                        Problemas
+                    </button>
+                    <button class="filter-btn px-5 py-2 rounded-xl bg-gray-100 text-gray-700 font-medium hover:bg-gray-200" data-filter="Ideia">
+                        Ideias
+                    </button>
+                    <button class="filter-btn px-5 py-2 rounded-xl bg-gray-100 text-gray-700 font-medium hover:bg-gray-200" data-filter="Oportunidade">
+                        Oportunidades
+                    </button>
+                </div>
+                
+                <!-- Lista de Contribuições -->
+                <div id="listaContribuicoes" class="space-y-4"></div>
+                
+                <div id="emptyState" class="text-center py-16 text-gray-500">
+                    <i data-lucide="inbox" class="w-16 h-16 mx-auto mb-4 opacity-30"></i>
+                    <p class="text-lg font-medium">Nenhuma contribuição ainda</p>
+                    <p class="text-sm mt-1">Seja o primeiro a contribuir!</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Seção Admin -->
+    <section class="py-16 bg-gray-50">
+        <div class="container mx-auto px-4">
+            <div class="max-w-4xl mx-auto">
+                <div class="bg-white rounded-3xl shadow-xl p-8 border border-gray-200">
+                    <h3 class="text-2xl font-bold mb-4 flex items-center gap-2">
+                        <i data-lucide="settings" class="w-6 h-6 text-gray-700"></i>
+                        Para Administradores
+                    </h3>
+                    <p class="text-gray-600 mb-6">
+                        Acesse o código do Google Apps Script e exporte os dados locais
+                    </p>
+                    <div class="flex flex-wrap gap-3">
+                        <button id="btnVerCodigo" class="px-6 py-3 bg-gray-900 text-white rounded-xl font-semibold hover:bg-black transition flex items-center gap-2">
+                            <i data-lucide="code" class="w-5 h-5"></i>
+                            Ver código do Google Apps Script
+                        </button>
+                        <button id="btnExportCSV" class="px-6 py-3 bg-green-600 text-white rounded-xl font-semibold hover:bg-green-700 transition flex items-center gap-2">
+                            <i data-lucide="download" class="w-5 h-5"></i>
+                            Exportar CSV Local
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="container mx-auto px-4">
+            <div class="max-w-6xl mx-auto text-center">
+                <div class="flex items-center justify-center gap-3 mb-4">
+                    <div class="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center">
+                        <i data-lucide="target" class="w-7 h-7"></i>
+                    </div>
+                    <div class="text-left">
+                        <h3 class="text-xl font-bold">Observatório Agenda 2040</h3>
+                        <p class="text-sm text-gray-400">São Borja, RS</p>
+                    </div>
+                </div>
+                <p class="text-gray-400 text-sm mt-6">
+                    © 2024 Prefeitura de São Borja. Construindo juntos o futuro da nossa cidade.
+                </p>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Modal Tipo -->
+    <div id="modalTipo" class="modal">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-8 shadow-2xl">
+            <div class="flex justify-between items-start mb-6">
+                <div class="flex items-center gap-4">
+                    <div id="modalIcon" class="w-14 h-14 rounded-xl flex items-center justify-center"></div>
+                    <div>
+                        <h3 id="modalTitle" class="text-2xl font-bold"></h3>
+                        <p id="modalSubtitle" class="text-gray-600 text-sm"></p>
+                    </div>
+                </div>
+                <button onclick="fecharModal()" class="p-2 hover:bg-gray-100 rounded-lg transition">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+            <div id="modalContent" class="text-gray-700 mb-6 leading-relaxed"></div>
+            <button onclick="fecharModal()" class="w-full btn-primary text-white px-6 py-3 rounded-xl font-semibold">
+                Entendi, continuar
+            </button>
+        </div>
+    </div>
+    
+    <!-- Modal Código Apps Script -->
+    <div id="modalCodigo" class="modal">
+        <div class="bg-white rounded-3xl max-w-4xl w-full p-8 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-start mb-6">
+                <h3 class="text-2xl font-bold flex items-center gap-2">
+                    <i data-lucide="code" class="w-6 h-6"></i>
+                    Código Google Apps Script
+                </h3>
+                <button onclick="fecharModalCodigo()" class="p-2 hover:bg-gray-100 rounded-lg transition">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+            <div class="bg-gray-900 text-gray-100 rounded-xl p-6 mb-4 overflow-x-auto">
+                <pre><code id="codigoScript">// CÓDIGO GOOGLE APPS SCRIPT - Code.gs
+// Cole este código no Apps Script da sua planilha
+
+function doPost(e) {
+  try {
+    // Parse do JSON recebido
+    const dados = JSON.parse(e.postData.contents);
+    
+    // Acessa a planilha ativa
+    const planilha = SpreadsheetApp.getActiveSpreadsheet();
+    const aba = planilha.getActiveSheet();
+    
+    // Adiciona nova linha com os dados
+    aba.appendRow([
+      dados.dataHora || new Date().toLocaleString('pt-BR', {timeZone: 'America/Sao_Paulo'}),
+      dados.tipo || '',
+      dados.conteudo || '',
+      dados.audioBase64 || '',
+      dados.eixo || '',
+      dados.eixoSugerido || '',
+      dados.bairro || '',
+      dados.latitude || '',
+      dados.longitude || '',
+      dados.nome || '',
+      dados.instituicao || '',
+      dados.userAgent || ''
+    ]);
+    
+    // Retorna sucesso com CORS
+    return ContentService
+      .createTextOutput(JSON.stringify({ 
+        status: 'sucesso', 
+        mensagem: 'Dados salvos com sucesso!' 
+      }))
+      .setMimeType(ContentService.MimeType.JSON);
+      
+  } catch (erro) {
+    // Retorna erro
+    return ContentService
+      .createTextOutput(JSON.stringify({ 
+        status: 'erro', 
+        mensagem: erro.toString() 
+      }))
+      .setMimeType(ContentService.MimeType.JSON);
   }
+}
 
-  // Gravação de áudio
-  async function startRecording() {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      mediaRecorder = new MediaRecorder(stream);
-      audioChunks = [];
+// Função para teste manual
+function testar() {
+  const dadosTeste = {
+    dataHora: new Date().toLocaleString('pt-BR', {timeZone: 'America/Sao_Paulo'}),
+    tipo: 'Teste',
+    conteudo: 'Contribuição de teste',
+    audioBase64: '',
+    eixo: 'Tecnologia e Inovação',
+    eixoSugerido: 'Sim',
+    bairro: 'Centro',
+    latitude: '-28.6606',
+    longitude: '-56.0042',
+    nome: 'Teste',
+    instituicao: 'Teste',
+    userAgent: 'Script'
+  };
+  
+  const e = { postData: { contents: JSON.stringify(dadosTeste) } };
+  const resultado = doPost(e);
+  Logger.log(resultado.getContent());
+}
 
-      mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
-      mediaRecorder.onstop = () => {
-        audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-        currentAudioURL = URL.createObjectURL(audioBlob);
-        document.getElementById('btnOuvir').classList.remove('hidden');
-        document.getElementById('audioStatus').textContent = 'Áudio gravado ✓';
-        updateProgress();
-      };
-
-      mediaRecorder.start();
-      document.getElementById('btnGravar').classList.add('hidden');
-      document.getElementById('btnParar').classList.remove('hidden');
-      document.getElementById('audioStatus').textContent = 'Gravando...';
-    } catch (err) {
-      showToast('Erro ao acessar microfone. Verifique as permissões.', 'error');
-    }
-  }
-
-  function stopRecording() {
-    if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-      mediaRecorder.stop();
-      mediaRecorder.stream.getTracks().forEach(track => track.stop());
-      document.getElementById('btnGravar').classList.remove('hidden');
-      document.getElementById('btnParar').classList.add('hidden');
-    }
-  }
-
-  function playAudio() {
-    if (currentAudioURL) {
-      const audio = new Audio(currentAudioURL);
-      audio.play();
-    }
-  }
-
-  // GPS
-  function getLocation() {
-    if (navigator.geolocation) {
-      document.getElementById('btnGps').textContent = 'Buscando...';
-      navigator.geolocation.getCurrentPosition(
-        position => {
-          document.getElementById('localizacao').value = `Lat: ${position.coords.latitude.toFixed(4)}, Long: ${position.coords.longitude.toFixed(4)}`;
-          document.getElementById('btnGps').innerHTML = `
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="3"/><path d="M12 2v6M12 16v6M2 12h6M16 12h6"/>
-            </svg>
-            GPS ✓`;
-          showToast('Localização obtida com sucesso!', 'success');
-        },
-        error => {
-          showToast('Não foi possível obter sua localização.', 'error');
-          document.getElementById('btnGps').innerHTML = `
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="3"/><path d="M12 2v6M12 16v6M2 12h6M16 12h6"/>
-            </svg>
-            GPS`;
-        }
-      );
-    } else {
-      showToast('Geolocalização não suportada neste navegador.', 'error');
-    }
-  }
-
-  // Sugestão de eixo por keywords
-  function suggestEixo() {
-    const text = document.getElementById('mensagem').value.toLowerCase();
-    if (text.length < 10) return;
-
-    let maxCount = 0;
-    let suggestedEixo = '';
-
-    for (const [eixo, keywords] of Object.entries(eixoKeywords)) {
-      let count = 0;
-      keywords.forEach(keyword => {
-        if (text.includes(keyword)) count++;
-      });
-      if (count > maxCount) {
-        maxCount = count;
-        suggestedEixo = eixo;
+// OPCIONAL: Converter Base64 em arquivo no Google Drive
+function converterAudioBase64ParaDrive() {
+  const planilha = SpreadsheetApp.getActiveSpreadsheet();
+  const aba = planilha.getActiveSheet();
+  const dados = aba.getDataRange().getValues();
+  
+  // Pula cabeçalho
+  for (let i = 1; i < dados.length; i++) {
+    const audioBase64 = dados[i][3]; // Coluna D
+    if (audioBase64 && audioBase64.startsWith('data:audio')) {
+      try {
+        // Remove prefixo data:audio/webm;base64,
+        const base64 = audioBase64.split(',')[1];
+        const blob = Utilities.newBlob(Utilities.base64Decode(base64), 'audio/webm', `audio_contribuicao_${i}.webm`);
+        
+        // Salva no Drive
+        const arquivo = DriveApp.createFile(blob);
+        const url = arquivo.getUrl();
+        
+        // Atualiza célula com link
+        aba.getRange(i + 1, 4).setValue(url);
+      } catch (erro) {
+        Logger.log(`Erro linha ${i + 1}: ${erro}`);
       }
     }
-
-    if (suggestedEixo && !document.getElementById('eixo').value) {
-      document.getElementById('eixo').value = suggestedEixo;
-      updateProgress();
-    }
   }
-
-  // Progress bar
-  function updateProgress() {
-    const fields = ['tipoContribuicao', 'eixo'];
-    let filled = 0;
+}</code></pre>
+            </div>
+            <button id="btnCopiarCodigo" class="w-full btn-primary text-white px-6 py-3 rounded-xl font-semibold flex items-center justify-center gap-2">
+                <i data-lucide="copy" class="w-5 h-5"></i>
+                Copiar Código
+            </button>
+        </div>
+    </div>
     
-    if (document.getElementById('tipoContribuicao').value) filled++;
-    if (document.getElementById('eixo').value) filled++;
-    if (document.getElementById('mensagem').value || audioBlob) filled++;
-
-    const progress = (filled / 3) * 100;
-    document.getElementById('progressFill').style.width = progress + '%';
-  }
-
-  // Submit
-  function handleSubmit(e) {
-    e.preventDefault();
-
-    const tipo = document.getElementById('tipoContribuicao').value;
-    const mensagem = document.getElementById('mensagem').value;
-    const eixo = document.getElementById('eixo').value;
-
-    if (!tipo) {
-      showToast('Por favor, selecione o tipo de contribuição.', 'error');
-      return;
-    }
-
-    if (!mensagem && !audioBlob) {
-      showToast('Por favor, escreva ou grave sua contribuição.', 'error');
-      return;
-    }
-
-    if (!eixo) {
-      showToast('Por favor, selecione um eixo temático.', 'error');
-      return;
-    }
-
-    const contribution = {
-      id: Date.now(),
-      tipo,
-      mensagem: mensagem || '[Áudio gravado]',
-      eixo,
-      localizacao: document.getElementById('localizacao').value || 'Não informado',
-      nome: document.getElementById('nome').value || 'Anônimo',
-      instituicao: document.getElementById('instituicao').value || null,
-      data: new Date().toISOString(),
-      hasAudio: !!audioBlob
-    };
-
-    contributions.unshift(contribution);
-    saveContributions();
-    resetForm();
-    showModal('modalSuccess');
-    updateCounter();
-    renderDashboard();
-  }
-
-  function resetForm() {
-    document.getElementById('contributionForm').reset();
-    document.querySelectorAll('.type-card').forEach(card => card.classList.remove('selected'));
-    document.getElementById('tipoContribuicao').value = '';
-    audioBlob = null;
-    currentAudioURL = null;
-    document.getElementById('btnOuvir').classList.add('hidden');
-    document.getElementById('audioStatus').textContent = '';
-    document.getElementById('progressFill').style.width = '0%';
-    switchInputMode('texto');
-  }
-
-  // LocalStorage
-  function saveContributions() {
-    localStorage.setItem('agenda2040_contributions', JSON.stringify(contributions));
-  }
-
-  function loadContributions() {
-    const saved = localStorage.getItem('agenda2040_contributions');
-    if (saved) {
-      contributions = JSON.parse(saved);
-    } else {
-      // Dados de exemplo
-      contributions = [
-        { id: 1, tipo: 'problema', mensagem: 'Falta de iluminação na Rua das Missões está deixando a região perigosa à noite.', eixo: 'seguranca', localizacao: 'Rua das Missões', nome: 'Maria Silva', data: '2025-09-01T10:30:00Z', hasAudio: false },
-        { id: 2, tipo: 'ideia', mensagem: 'Criar uma feira de produtores locais aos domingos na praça central para fortalecer a economia.', eixo: 'desenvolvimento_economico', localizacao: 'Praça Central', nome: 'João Santos', data: '2025-09-02T14:20:00Z', hasAudio: false },
-        { id: 3, tipo: 'oportunidade', mensagem: 'O patrimônio histórico das Missões tem grande potencial turístico que pode ser melhor explorado.', eixo: 'cultura', localizacao: 'Sítio Histórico', nome: 'Anônimo', data: '2025-09-03T09:15:00Z', hasAudio: false }
-      ];
-      saveContributions();
-    }
-  }
-
-  // Counter animado
-  function updateCounter() {
-    const target = contributions.length;
-    const counter = document.getElementById('counter');
-    const start = parseInt(counter.textContent) || 0;
-    const duration = 1000;
-    const startTime = performance.now();
-
-    function animate(currentTime) {
-      const elapsed = currentTime - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-      const current = Math.floor(start + (target - start) * progress);
-      counter.textContent = current;
-
-      if (progress < 1) {
-        requestAnimationFrame(animate);
-      }
-    }
-
-    requestAnimationFrame(animate);
-  }
-
-  // Dashboard
-  function renderDashboard() {
-    const filter = document.getElementById('filtroEixo').value;
-    const filtered = filter === 'todos' ? contributions : contributions.filter(c => c.eixo === filter);
-    
-    document.getElementById('totalExibido').textContent = `${filtered.length} contribuição${filtered.length !== 1 ? 'es' : ''}`;
-    
-    renderWordCloud();
-    renderContributions(filtered);
-  }
-
-  function renderWordCloud() {
-    const words = {};
-    contributions.forEach(c => {
-      const text = c.mensagem.toLowerCase();
-      const tokens = text.match(/\b\w{4,}\b/g) || [];
-      tokens.forEach(word => {
-        if (!['para', 'como', 'mais', 'pode', 'seria', 'deveria', 'muito'].includes(word)) {
-          words[word] = (words[word] || 0) + 1;
-        }
-      });
-    });
-
-    const sorted = Object.entries(words).sort((a, b) => b[1] - a[1]).slice(0, 15);
-    const cloud = document.getElementById('wordCloud');
-    cloud.innerHTML = '';
-
-    sorted.forEach(([word, count]) => {
-      const size = 0.8 + (count / sorted[0][1]) * 0.4;
-      const tag = document.createElement('div');
-      tag.className = 'word-tag';
-      tag.style.fontSize = size + 'rem';
-      tag.textContent = word;
-      cloud.appendChild(tag);
-    });
-  }
-
-  function renderContributions(list) {
-    const grid = document.getElementById('contributionsGrid');
-    
-    if (list.length === 0) {
-      grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--text-light);">Nenhuma contribuição encontrada.</p>';
-      return;
-    }
-
-    // Skeleton loading
-    grid.innerHTML = Array(3).fill(0).map(() => `
-      <div class="contribution-card">
-        <div class="skeleton" style="width: 120px; height: 24px; margin-bottom: 12px;"></div>
-        <div class="skeleton" style="width: 100%; height: 60px; margin-bottom: 12px;"></div>
-        <div class="skeleton" style="width: 80%; height: 16px;"></div>
-      </div>
-    `).join('');
-
-    setTimeout(() => {
-      grid.innerHTML = list.map(c => {
-        const badges = {
-          problema: { icon: '🔴', class: 'badge-problema', label: 'Problema' },
-          ideia: { icon: '💡', class: 'badge-ideia', label: 'Ideia' },
-          oportunidade: { icon: '📈', class: 'badge-oportunidade', label: 'Oportunidade' }
+    <script>
+        // ====================================================================
+        // CONFIGURAÇÃO IMPORTANTE
+        // ====================================================================
+        // COLE AQUI A URL DO SEU GOOGLE APPS SCRIPT WEB APP
+        // Exemplo: 'https://script.google.com/macros/s/AKfycbx.../exec'
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwszmmKjZRLbEB0-aAkqW0dOUvAsFWQALkWvS2bYMhgYv_xCQsJfFTCIL1ZoqqJ2xRT/exec';
+        // ====================================================================
+        
+        // Estado da aplicação
+        let tipoSelecionado = '';
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let audioBlob = null;
+        let audioBase64 = '';
+        let gravando = false;
+        let timerInterval = null;
+        let segundosGravacao = 0;
+        
+        // Keywords para auto-sugestão de eixo
+        const eixoKeywords = {
+            'Desenvolvimento Econômico': ['emprego', 'trabalho', 'empresa', 'comércio', 'indústria', 'negócio', 'renda', 'economia'],
+            'Infraestrutura e Mobilidade': ['rua', 'estrada', 'asfalto', 'ônibus', 'trânsito', 'calçada', 'iluminação', 'energia', 'água', 'esgoto'],
+            'Saúde e Bem-estar': ['hospital', 'posto', 'médico', 'saúde', 'UBS', 'atendimento', 'doença', 'vacina'],
+            'Educação e Cultura': ['escola', 'educação', 'professor', 'aluno', 'creche', 'cultura', 'teatro', 'biblioteca'],
+            'Meio Ambiente': ['lixo', 'reciclagem', 'poluição', 'árvore', 'parque', 'rio', 'sustentável', 'verde'],
+            'Segurança Pública': ['polícia', 'segurança', 'crime', 'violência', 'roubo', 'guarda', 'vigilância'],
+            'Tecnologia e Inovação': ['internet', 'wifi', 'tecnologia', 'digital', 'app', 'sistema', 'inovação'],
+            'Turismo e Patrimônio': ['turismo', 'história', 'patrimônio', 'museu', 'evento', 'festa', 'cultura'],
+            'Gestão Pública': ['prefeitura', 'vereador', 'imposto', 'serviço público', 'atendimento', 'burocracia']
         };
-        const badge = badges[c.tipo];
-        const date = new Date(c.data).toLocaleDateString('pt-BR');
-        const eixoText = document.querySelector(`#eixo option[value="${c.eixo}"]`)?.textContent || c.eixo;
-
-        return `
-          <div class="contribution-card ${c.tipo} fade-in">
-            <span class="badge ${badge.class}">${badge.icon} ${badge.label}</span>
-            <p style="margin-bottom: 12px;">${c.mensagem}</p>
-            <div class="contribution-meta">
-              <span>📍 ${c.localizacao}</span>
-              <span>📅 ${date}</span>
-              <span>🏷️ ${eixoText}</span>
-              ${c.hasAudio ? '<span>🎤 Áudio</span>' : ''}
-            </div>
-            ${c.nome !== 'Anônimo' ? `<p style="margin-top: 12px; font-size: 0.875rem; color: var(--text-light);">Por: ${c.nome}${c.instituicao ? ' - ' + c.instituicao : ''}</p>` : ''}
-          </div>
-        `;
-      }).join('');
-    }, 300);
-  }
-
-  // Modais
-  function showModalInfo(type) {
-    const info = modalInfos[type];
-    document.getElementById('modalInfoContent').innerHTML = `
-      <h2 style="margin-bottom: 20px;">${info.title}</h2>
-      ${info.content}
-    `;
-    showModal('modalInfo');
-  }
-
-  function showModal(id) {
-    document.getElementById(id).classList.add('show');
-    document.body.style.overflow = 'hidden';
-  }
-
-  function closeModal(id) {
-    document.getElementById(id).classList.remove('show');
-    document.body.style.overflow = '';
-  }
-
-  // Toast
-  function showToast(message, type = 'success') {
-    const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
-    toast.innerHTML = `
-      <span>${type === 'success' ? '✓' : '✕'}</span>
-      <span>${message}</span>
-    `;
-    document.getElementById('toastContainer').appendChild(toast);
-
-    setTimeout(() => {
-      toast.style.animation = 'fadeIn 0.3s ease reverse';
-      setTimeout(() => toast.remove(), 300);
-    }, 3000);
-  }
-
-  // Ripple effect
-  function createRipple(e) {
-    const btn = e.currentTarget;
-    const ripple = document.createElement('span');
-    ripple.className = 'ripple';
-    const rect = btn.getBoundingClientRect();
-    const size = Math.max(rect.width, rect.height);
-    ripple.style.width = ripple.style.height = size + 'px';
-    ripple.style.left = (e.clientX - rect.left - size / 2) + 'px';
-    ripple.style.top = (e.clientY - rect.top - size / 2) + 'px';
-    btn.appendChild(ripple);
-    setTimeout(() => ripple.remove(), 600);
-  }
-
-  // Fechar modal ao clicar fora
-  document.querySelectorAll('.modal').forEach(modal => {
-    modal.addEventListener('click', (e) => {
-      if (e.target === modal) {
-        modal.classList.remove('show');
-        document.body.style.overflow = '';
-      }
-    });
-  });
-</script>
-
+        
+        // Placeholders por tipo
+        const placeholders = {
+            'Problema': 'Descreva o problema que você identificou em São Borja. Seja específico: onde ocorre, qual o impacto, há quanto tempo existe?',
+            'Ideia': 'Compartilhe sua ideia para melhorar São Borja. Como funcionaria? Quais benefícios traria? Como poderia ser implementada?',
+            'Oportunidade': 'Indique uma oportunidade para São Borja. Que potencial você enxerga? Como a cidade poderia aproveitá-la?'
+        };
+        
+        // Modal content por tipo
+        const modalContent = {
+            'Problema': {
+                icon: 'alert-circle',
+                color: 'red',
+                title: 'Reportar Problema',
+                subtitle: 'Identifique desafios da cidade',
+                content: 'Use esta opção para relatar problemas reais que afetam São Borja. Seja claro e objetivo: descreva onde ocorre, qual o impacto na comunidade e, se possível, sugira a urgência. Exemplos: falta de iluminação em uma rua, buracos no asfalto, ausência de coleta de lixo.'
+            },
+            'Ideia': {
+                icon: 'lightbulb',
+                color: 'blue',
+                title: 'Propor Ideia',
+                subtitle: 'Sugira soluções criativas',
+                content: 'Compartilhe ideias inovadoras para resolver problemas ou melhorar aspectos da cidade. Explique como sua ideia funcionaria na prática, quais recursos seriam necessários e quais benefícios traria para a população. Toda ideia conta!'
+            },
+            'Oportunidade': {
+                icon: 'trending-up',
+                color: 'green',
+                title: 'Indicar Oportunidade',
+                subtitle: 'Aponte potenciais da cidade',
+                content: 'Identifique oportunidades que São Borja pode aproveitar. Pode ser um recurso natural, um talento local, uma tendência de mercado ou um patrimônio histórico. Explique por que é uma oportunidade e como a cidade poderia se beneficiar dela.'
+            }
+        };
+        
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            carregarDados();
+            configurarEventListeners();
+            atualizarContadores();
+            atualizarWordCloud();
+            renderizarContribuicoes();
+            verificarDarkMode();
+        });
+        
+        function configurarEventListeners() {
+            // Tipo buttons
+            document.querySelectorAll('.tipo-btn').forEach(btn => {
+                btn.addEventListener('click', () => selecionarTipo(btn.dataset.tipo));
+            });
+            
+            // Form
+            document.getElementById('contribuicaoForm').addEventListener('submit', enviarContribuicao);
+            
+            // Área de texto - auto-sugerir eixo
+            document.getElementById('conteudo').addEventListener('input', sugerirEixo);
+            
+            // GPS
+            document.getElementById('btnGPS').addEventListener('click', obterLocalizacao);
+            
+            // Áudio
+            document.getElementById('btnGravar').addEventListener('click', iniciarGravacao);
+            document.getElementById('btnParar').addEventListener('click', pararGravacao);
+            document.getElementById('btnRemoverAudio').addEventListener('click', removerAudio);
+            
+            // Filtros
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.addEventListener('click', () => filtrarContribuicoes(btn.dataset.filter));
+            });
+            
+            // Dark mode
+            document.getElementById('darkModeToggle').addEventListener('click', toggleDarkMode);
+            
+            // Admin
+            document.getElementById('btnVerCodigo').addEventListener('click', abrirModalCodigo);
+            document.getElementById('btnExportCSV').addEventListener('click', exportarCSV);
+            document.getElementById('btnCopiarCodigo').addEventListener('click', copiarCodigo);
+        }
+        
+        function selecionarTipo(tipo) {
+            tipoSelecionado = tipo;
+            document.getElementById('tipo').value = tipo;
+            
+            // Atualizar visual dos botões
+            document.querySelectorAll('.tipo-btn').forEach(btn => {
+                if (btn.dataset.tipo === tipo) {
+                    btn.classList.add('border-4', `border-${modalContent[tipo].color}-500`, 'bg-gray-50');
+                } else {
+                    btn.classList.remove('border-4', 'border-red-500', 'border-blue-500', 'border-green-500', 'bg-gray-50');
+                }
+            });
+            
+            // Atualizar placeholder
+            const textarea = document.getElementById('conteudo');
+            textarea.disabled = false;
+            textarea.placeholder = placeholders[tipo];
+            textarea.focus();
+            
+            // Mostrar modal explicativo
+            mostrarModalTipo(tipo);
+            
+            lucide.createIcons();
+        }
+        
+        function mostrarModalTipo(tipo) {
+            const modal = document.getElementById('modalTipo');
+            const info = modalContent[tipo];
+            
+            document.getElementById('modalIcon').className = `w-14 h-14 rounded-xl flex items-center justify-center bg-${info.color}-100`;
+            document.getElementById('modalIcon').innerHTML = `<i data-lucide="${info.icon}" class="w-7 h-7 text-${info.color}-600"></i>`;
+            document.getElementById('modalTitle').textContent = info.title;
+            document.getElementById('modalSubtitle').textContent = info.subtitle;
+            document.getElementById('modalContent').textContent = info.content;
+            
+            modal.classList.add('active');
+            lucide.createIcons();
+        }
+        
+        function fecharModal() {
+            document.getElementById('modalTipo').classList.remove('active');
+        }
+        
+        function sugerirEixo() {
+            const texto = document.getElementById('conteudo').value.toLowerCase();
+            const eixoSugeridoEl = document.getElementById('eixoSugerido');
+            
+            if (texto.length < 10) {
+                eixoSugeridoEl.classList.add('hidden');
+                return;
+            }
+            
+            let eixoMaisProvavel = '';
+            let maxMatches = 0;
+            
+            for (const [eixo, keywords] of Object.entries(eixoKeywords)) {
+                const matches = keywords.filter(kw => texto.includes(kw)).length;
+                if (matches > maxMatches) {
+                    maxMatches = matches;
+                    eixoMaisProvavel = eixo;
+                }
+            }
+            
+            if (eixoMaisProvavel && maxMatches > 0) {
+                eixoSugeridoEl.textContent = `💡 Sugestão: ${eixoMaisProvavel}`;
+                eixoSugeridoEl.classList.remove('hidden');
+                
+                // Auto-selecionar se ainda não tiver eixo
+                const eixoSelect = document.getElementById('eixo');
+                if (!eixoSelect.value) {
+                    eixoSelect.value = eixoMaisProvavel;
+                }
+            } else {
+                eixoSugeridoEl.classList.add('hidden');
+            }
+        }
+        
+        async function iniciarGravacao() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+                
+                mediaRecorder.ondataavailable = (e) => audioChunks.push(e.data);
+                mediaRecorder.onstop = processarAudio;
+                
+                mediaRecorder.start();
+                gravando = true;
+                
+                document.getElementById('btnGravar').classList.add('hidden');
+                document.getElementById('btnParar').classList.remove('hidden');
+                document.getElementById('audioTimer').classList.remove('hidden');
+                
+                // Timer
+                segundosGravacao = 0;
+                timerInterval = setInterval(() => {
+                    segundosGravacao++;
+                    const min = Math.floor(segundosGravacao / 60).toString().padStart(2, '0');
+                    const seg = (segundosGravacao % 60).toString().padStart(2, '0');
+                    document.getElementById('audioTimer').textContent = `${min}:${seg}`;
+                }, 1000);
+                
+                mostrarToast('Gravação iniciada', 'info');
+            } catch (erro) {
+                mostrarToast('Erro ao acessar microfone. Verifique as permissões.', 'erro');
+                console.error(erro);
+            }
+        }
+        
+        function pararGravacao() {
+            if (mediaRecorder && gravando) {
+                mediaRecorder.stop();
+                mediaRecorder.stream.getTracks().forEach(track => track.stop());
+                gravando = false;
+                
+                clearInterval(timerInterval);
+                document.getElementById('btnGravar').classList.remove('hidden');
+                document.getElementById('btnParar').classList.add('hidden');
+                document.getElementById('audioTimer').classList.add('hidden');
+                
+                mostrarToast('Gravação finalizada', 'sucesso');
+            }
+        }
+        
+        async function processarAudio() {
+            audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+            const audioUrl = URL.createObjectURL(audioBlob);
+            
+            document.getElementById('audioPlayer').src = audioUrl;
+            document.getElementById('audioPreview').classList.remove('hidden');
+            
+            // Converter para Base64
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                audioBase64 = reader.result;
+            };
+            reader.readAsDataURL(audioBlob);
+        }
+        
+        function removerAudio() {
+            audioBlob = null;
+            audioBase64 = '';
+            audioChunks = [];
+            document.getElementById('audioPreview').classList.add('hidden');
+            document.getElementById('audioPlayer').src = '';
+            mostrarToast('Áudio removido', 'info');
+        }
+        
+        function obterLocalizacao() {
+            if (!navigator.geolocation) {
+                mostrarToast('Geolocalização não suportada', 'erro');
+                return;
+            }
+            
+            mostrarToast('Obtendo localização...', 'info');
+            
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    document.getElementById('latitude').value = pos.coords.latitude.toFixed(6);
+                    document.getElementById('longitude').value = pos.coords.longitude.toFixed(6);
+                    mostrarToast('Localização obtida com sucesso!', 'sucesso');
+                },
+                (erro) => {
+                    mostrarToast('Erro ao obter localização', 'erro');
+                    console.error(erro);
+                }
+            );
+        }
+        
+        async function enviarContribuicao(e) {
+            e.preventDefault();
+            
+            // Validação
+            const tipo = document.getElementById('tipo').value;
+            const conteudo = document.getElementById('conteudo').value.trim();
+            const eixo = document.getElementById('eixo').value;
+            
+            if (!tipo) {
+                mostrarToast('Selecione um tipo de contribuição', 'erro');
+                return;
+            }
+            
+            if (!conteudo && !audioBase64) {
+                mostrarToast('Escreva sua contribuição ou grave um áudio', 'erro');
+                return;
+            }
+            
+            if (!eixo) {
+                mostrarToast('Selecione um eixo temático', 'erro');
+                return;
+            }
+            
+            // Verificar se URL foi configurada
+            if (GOOGLE_SCRIPT_URL === 'COLE_SUA_URL_AQUI') {
+                mostrarToast('Configure a URL do Google Apps Script no código', 'erro');
+                return;
+            }
+            
+            const btnEnviar = document.getElementById('btnEnviar');
+            btnEnviar.disabled = true;
+            btnEnviar.innerHTML = '<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i><span>Enviando...</span>';
+            lucide.createIcons();
+            
+            // Montar objeto de dados
+            const dataHora = new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+            const dados = {
+                tipo: tipo,
+                conteudo: conteudo,
+                audioBase64: audioBase64,
+                eixo: eixo,
+                eixoSugerido: document.getElementById('eixoSugerido').textContent || '',
+                bairro: document.getElementById('bairro').value,
+                latitude: document.getElementById('latitude').value,
+                longitude: document.getElementById('longitude').value,
+                nome: document.getElementById('nome').value,
+                instituicao: document.getElementById('instituicao').value,
+                dataHora: dataHora,
+                userAgent: navigator.userAgent
+            };
+            
+            try {
+                // Enviar para Google Sheets
+                const resposta = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors', // Necessário para Apps Script
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(dados)
+                });
+                
+                // Salvar também no localStorage como backup
+                salvarNoLocalStorage(dados);
+                
+                mostrarToast('Contribuição enviada com sucesso!', 'sucesso');
+                limparFormulario();
+                carregarDados();
+                atualizarContadores();
+                atualizarWordCloud();
+                renderizarContribuicoes();
+                
+            } catch (erro) {
+                console.error('Erro ao enviar:', erro);
+                // Mesmo com erro no fetch (no-cors), salvamos localmente
+                salvarNoLocalStorage(dados);
+                mostrarToast('Salvo localmente. Verifique conexão.', 'info');
+                limparFormulario();
+                carregarDados();
+                atualizarContadores();
+                atualizarWordCloud();
+                renderizarContribuicoes();
+            } finally {
+                btnEnviar.disabled = false;
+                btnEnviar.innerHTML = '<i data-lucide="send" class="w-5 h-5"></i><span>Enviar Contribuição</span>';
+                lucide.createIcons();
+            }
+        }
+        
+        function salvarNoLocalStorage(dados) {
+            const contribuicoes = JSON.parse(localStorage.getItem('agenda2040_contribuicoes') || '[]');
+            contribuicoes.unshift({ ...dados, id: Date.now() });
+            localStorage.setItem('agenda2040_contribuicoes', JSON.stringify(contribuicoes));
+        }
+        
+        function carregarDados() {
+            return JSON.parse(localStorage.getItem('agenda2040_contribuicoes') || '[]');
+        }
+        
+        function limparFormulario() {
+            document.getElementById('contribuicaoForm').reset();
+            document.getElementById('tipo').value = '';
+            tipoSelecionado = '';
+            audioBase64 = '';
+            audioBlob = null;
+            document.getElementById('audioPreview').classList.add('hidden');
+            document.getElementById('eixoSugerido').classList.add('hidden');
+            document.querySelectorAll('.tipo-btn').forEach(btn => {
+                btn.classList.remove('border-4', 'border-red-500', 'border-blue-500', 'border-green-500', 'bg-gray-50');
+            });
+            document.getElementById('conteudo').disabled = true;
+            document.getElementById('conteudo').placeholder = 'Selecione um tipo de contribuição acima...';
+        }
+        
+        function atualizarContadores() {
+            const dados = carregarDados();
+            const contagem = {
+                'Problema': 0,
+                'Ideia': 0,
+                'Oportunidade': 0
+            };
+            
+            dados.forEach(item => {
+                if (contagem.hasOwnProperty(item.tipo)) {
+                    contagem[item.tipo]++;
+                }
+            });
+            
+            animarContador('counterProblemas', contagem.Problema);
+            animarContador('counterIdeias', contagem.Ideia);
+            animarContador('counterOportunidades', contagem.Oportunidade);
+        }
+        
+        function animarContador(id, valor) {
+            const el = document.getElementById(id);
+            const atual = parseInt(el.textContent) || 0;
+            const incremento = Math.ceil((valor - atual) / 20);
+            
+            if (atual < valor) {
+                el.textContent = Math.min(atual + incremento, valor);
+                setTimeout(() => animarContador(id, valor), 30);
+            } else {
+                el.textContent = valor;
+            }
+        }
+        
+        function atualizarWordCloud() {
+            const dados = carregarDados();
+            const palavras = {};
+            
+            dados.forEach(item => {
+                const texto = item.conteudo.toLowerCase();
+                const tokens = texto.match(/\b[\wÀ-ÿ]{4,}\b/g) || [];
+                tokens.forEach(palavra => {
+                    palavras[palavra] = (palavras[palavra] || 0) + 1;
+                });
+            });
+            
+            const topPalavras = Object.entries(palavras)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 20);
+            
+            const cloud = document.getElementById('wordCloud');
+            if (topPalavras.length === 0) {
+                cloud.innerHTML = '<p class="text-gray-500">Nenhum tema ainda. Seja o primeiro a contribuir!</p>';
+                return;
+            }
+            
+            cloud.innerHTML = topPalavras.map(([palavra, count]) => {
+                const size = Math.min(14 + count * 2, 28);
+                return `<span style="font-size: ${size}px">${palavra} (${count})</span>`;
+            }).join('');
+        }
+        
+        function renderizarContribuicoes(filtro = 'todos') {
+            const dados = carregarDados();
+            const lista = document.getElementById('listaContribuicoes');
+            const emptyState = document.getElementById('emptyState');
+            
+            const filtrados = filtro === 'todos' ? dados : dados.filter(item => item.tipo === filtro);
+            
+            if (filtrados.length === 0) {
+                lista.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            }
+            
+            emptyState.classList.add('hidden');
+            
+            lista.innerHTML = filtrados.map(item => {
+                const cores = {
+                    'Problema': { bg: 'bg-red-50', border: 'border-red-200', text: 'text-red-700', icon: 'alert-circle' },
+                    'Ideia': { bg: 'bg-blue-50', border: 'border-blue-200', text: 'text-blue-700', icon: 'lightbulb' },
+                    'Oportunidade': { bg: 'bg-green-50', border: 'border-green-200', text: 'text-green-700', icon: 'trending-up' }
+                };
+                
+                const cor = cores[item.tipo] || cores['Ideia'];
+                
+                return `
+                    <div class="bg-white rounded-2xl p-6 border-2 ${cor.border} card-hover animate-fade-in">
+                        <div class="flex items-start gap-4">
+                            <div class="w-12 h-12 ${cor.bg} rounded-xl flex items-center justify-center flex-shrink-0">
+                                <i data-lucide="${cor.icon}" class="w-6 h-6 ${cor.text}"></i>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex flex-wrap items-center gap-2 mb-2">
+                                    <span class="px-3 py-1 ${cor.bg} ${cor.text} rounded-lg text-xs font-semibold">
+                                        ${item.tipo}
+                                    </span>
+                                    <span class="px-3 py-1 bg-gray-100 text-gray-700 rounded-lg text-xs font-medium">
+                                        ${item.eixo}
+                                    </span>
+                                    ${item.bairro ? `<span class="text-xs text-gray-500 flex items-center gap-1">
+                                        <i data-lucide="map-pin" class="w-3 h-3"></i>${item.bairro}
+                                    </span>` : ''}
+                                </div>
+                                <p class="text-gray-800 mb-3 leading-relaxed">${item.conteudo || '<em class="text-gray-500">Contribuição em áudio</em>'}</p>
+                                ${item.audioBase64 ? `
+                                    <audio controls class="w-full mb-3">
+                                        <source src="${item.audioBase64}" type="audio/webm">
+                                    </audio>
+                                ` : ''}
+                                <div class="flex flex-wrap items-center gap-3 text-xs text-gray-500">
+                                    ${item.nome ? `<span class="flex items-center gap-1">
+                                        <i data-lucide="user" class="w-3 h-3"></i>${item.nome}
+                                    </span>` : ''}
+                                    ${item.instituicao ? `<span class="flex items-center gap-1">
+                                        <i data-lucide="building" class="w-3 h-3"></i>${item.instituicao}
+                                    </span>` : ''}
+                                    <span class="flex items-center gap-1">
+                                        <i data-lucide="clock" class="w-3 h-3"></i>${item.dataHora}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            lucide.createIcons();
+        }
+        
+        function filtrarContribuicoes(filtro) {
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                if (btn.dataset.filter === filtro) {
+                    btn.classList.add('active', 'bg-green-600', 'text-white');
+                    btn.classList.remove('bg-gray-100', 'text-gray-700');
+                } else {
+                    btn.classList.remove('active', 'bg-green-600', 'text-white');
+                    btn.classList.add('bg-gray-100', 'text-gray-700');
+                }
+            });
+            renderizarContribuicoes(filtro);
+        }
+        
+        function mostrarToast(mensagem, tipo = 'info') {
+            const container = document.getElementById('toastContainer');
+            const cores = {
+                'sucesso': 'bg-green-600',
+                'erro': 'bg-red-600',
+                'info': 'bg-blue-600'
+            };
+            
+            const icons = {
+                'sucesso': 'check-circle',
+                'erro': 'x-circle',
+                'info': 'info'
+            };
+            
+            const toast = document.createElement('div');
+            toast.className = `toast ${cores[tipo]} text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 max-w-sm`;
+            toast.innerHTML = `
+                <i data-lucide="${icons[tipo]}" class="w-5 h-5 flex-shrink-0"></i>
+                <span class="font-medium">${mensagem}</span>
+            `;
+            
+            container.appendChild(toast);
+            lucide.createIcons();
+            
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(400px)';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+        
+        function abrirModalCodigo() {
+            document.getElementById('modalCodigo').classList.add('active');
+            lucide.createIcons();
+        }
+        
+        function fecharModalCodigo() {
+            document.getElementById('modalCodigo').classList.remove('active');
+        }
+        
+        function copiarCodigo() {
+            const codigo = document.getElementById('codigoScript').textContent;
+            navigator.clipboard.writeText(codigo).then(() => {
+                mostrarToast('Código copiado!', 'sucesso');
+            });
+        }
+        
+        function exportarCSV() {
+            const dados = carregarDados();
+            if (dados.length === 0) {
+                mostrarToast('Nenhum dado para exportar', 'info');
+                return;
+            }
+            
+            let csv = 'DataHora,Tipo,Conteudo,Eixo,Bairro,Latitude,Longitude,Nome,Instituicao\n';
+            dados.forEach(item => {
+                csv += `"${item.dataHora}","${item.tipo}","${item.conteudo.replace(/"/g, '""')}","${item.eixo}","${item.bairro}","${item.latitude}","${item.longitude}","${item.nome}","${item.instituicao}"\n`;
+            });
+            
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `agenda2040_contribuicoes_${new Date().toISOString().split('T')[0]}.csv`;
+            link.click();
+            
+            mostrarToast('CSV exportado com sucesso!', 'sucesso');
+        }
+        
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark');
+            const isDark = document.body.classList.contains('dark');
+            localStorage.setItem('agenda2040_darkmode', isDark);
+            
+            const icon = document.querySelector('#darkModeToggle i');
+            icon.setAttribute('data-lucide', isDark ? 'sun' : 'moon');
+            lucide.createIcons();
+        }
+        
+        function verificarDarkMode() {
+            const isDark = localStorage.getItem('agenda2040_darkmode') === 'true';
+            if (isDark) {
+                document.body.classList.add('dark');
+                const icon = document.querySelector('#darkModeToggle i');
+                icon.setAttribute('data-lucide', 'sun');
+                lucide.createIcons();
+            }
+        }
+    </script>
 </body>
 </html>
-Command Palette
-Search for a command to run...
-
-
-
