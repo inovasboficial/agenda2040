@@ -379,13 +379,13 @@
 
         <!-- Footer -->
         <footer class="mt-12 text-center text-xs text-gray-500 pb-8">
-            <p>Observatório Agenda 2040 São Borja • Por <a href="https://www.instagram.com/inovasb_oficial/" target="_blank" rel="noopener" class="underline hover:text-primary">Ecossistema de Inovação INOVA SB</a> • Dados abertos e participação cidadã</p>
+            <p>Observatório Agenda 2040 São Borja • Por <a href="https://www.instagram.com/inovasb_oficial/" target="_blank" class="underline hover:text-primary">Ecossistema de Inovação INOVA SB</a> • Dados abertos e participação cidadã</p>
         </footer>
     </main>
 
     <script>
         // Google Script URL - MANTER CONSTANTE
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz_CONSTANT_URL/exec';
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwszmmKjZRLbEB0-aAkqW0dOUvAsFWQALkWvS2bYMhgYv_xCQsJfFTCIL1ZoqqJ2xRT/exec';
 
         // Elements
         const tipo = document.getElementById('tipo');
@@ -497,6 +497,27 @@
                 btn.innerHTML = '<i data-lucide="mic-off" class="w-3.5 h-3.5"></i> Indisponível';
                 btn.title = 'Reconhecimento de voz não suportado neste navegador. Use Chrome no Android ou Edge no desktop.';
                 if (window.lucide) lucide.createIcons();
+
+        // === CONTAGEM REAL DA PLANILHA ===
+        const STATS_URL = 'https://script.google.com/macros/s/AKfycbwszmmKjZRLbEB0-aAkqW0dOUvAsFWQALkWvS2bYMhgYv_xCQsJfFTCIL1ZoqqJ2xRT/exec';
+        async function atualizarContadores() {
+            try {
+                const r = await fetch(STATS_URL + '?_=' + Date.now());
+                if (!r.ok) throw new Error('HTTP ' + r.status);
+                const d = await r.json();
+                document.getElementById('count-problema').textContent = d.problemas ?? 0;
+                document.getElementById('count-ideia').textContent = d.ideias ?? 0;
+                const totalEl = document.getElementById('stat-total');
+                if (totalEl) totalEl.textContent = (d.total ?? 0) + ' participações';
+                console.log('Contadores atualizados:', d);
+            } catch (err) {
+                console.warn('Falha ao buscar totais:', err);
+                // mantém 0
+            }
+        }
+        atualizarContadores();
+        setInterval(atualizarContadores, 15000);
+
                 return;
             }
             
@@ -520,6 +541,27 @@
                     btn.innerHTML = '<i data-lucide="square" class="w-3.5 h-3.5"></i> Gravando...';
                     btn.classList.add('text-red-600', 'bg-red-50', 'border-red-200');
                     if (window.lucide) lucide.createIcons();
+
+        // === CONTAGEM REAL DA PLANILHA ===
+        const STATS_URL = 'https://script.google.com/macros/s/AKfycbwszmmKjZRLbEB0-aAkqW0dOUvAsFWQALkWvS2bYMhgYv_xCQsJfFTCIL1ZoqqJ2xRT/exec';
+        async function atualizarContadores() {
+            try {
+                const r = await fetch(STATS_URL + '?_=' + Date.now());
+                if (!r.ok) throw new Error('HTTP ' + r.status);
+                const d = await r.json();
+                document.getElementById('count-problema').textContent = d.problemas ?? 0;
+                document.getElementById('count-ideia').textContent = d.ideias ?? 0;
+                const totalEl = document.getElementById('stat-total');
+                if (totalEl) totalEl.textContent = (d.total ?? 0) + ' participações';
+                console.log('Contadores atualizados:', d);
+            } catch (err) {
+                console.warn('Falha ao buscar totais:', err);
+                // mantém 0
+            }
+        }
+        atualizarContadores();
+        setInterval(atualizarContadores, 15000);
+
                     
                     recognition.onstart = () => {
                         console.log('Voz iniciada');
@@ -545,6 +587,27 @@
                         btn.innerHTML = '<i data-lucide="mic" class="w-3.5 h-3.5"></i> Falar';
                         btn.classList.remove('text-red-600', 'bg-red-50', 'border-red-200');
                         if (window.lucide) lucide.createIcons();
+
+        // === CONTAGEM REAL DA PLANILHA ===
+        const STATS_URL = 'https://script.google.com/macros/s/AKfycbwszmmKjZRLbEB0-aAkqW0dOUvAsFWQALkWvS2bYMhgYv_xCQsJfFTCIL1ZoqqJ2xRT/exec';
+        async function atualizarContadores() {
+            try {
+                const r = await fetch(STATS_URL + '?_=' + Date.now());
+                if (!r.ok) throw new Error('HTTP ' + r.status);
+                const d = await r.json();
+                document.getElementById('count-problema').textContent = d.problemas ?? 0;
+                document.getElementById('count-ideia').textContent = d.ideias ?? 0;
+                const totalEl = document.getElementById('stat-total');
+                if (totalEl) totalEl.textContent = (d.total ?? 0) + ' participações';
+                console.log('Contadores atualizados:', d);
+            } catch (err) {
+                console.warn('Falha ao buscar totais:', err);
+                // mantém 0
+            }
+        }
+        atualizarContadores();
+        setInterval(atualizarContadores, 15000);
+
                         
                         if (e.error === 'not-allowed') {
                             alert('Permissão de microfone negada. Ative nas configurações do navegador.');
@@ -558,6 +621,27 @@
                         btn.innerHTML = '<i data-lucide="mic" class="w-3.5 h-3.5"></i> Falar';
                         btn.classList.remove('text-red-600', 'bg-red-50', 'border-red-200');
                         if (window.lucide) lucide.createIcons();
+
+        // === CONTAGEM REAL DA PLANILHA ===
+        const STATS_URL = 'https://script.google.com/macros/s/AKfycbwszmmKjZRLbEB0-aAkqW0dOUvAsFWQALkWvS2bYMhgYv_xCQsJfFTCIL1ZoqqJ2xRT/exec';
+        async function atualizarContadores() {
+            try {
+                const r = await fetch(STATS_URL + '?_=' + Date.now());
+                if (!r.ok) throw new Error('HTTP ' + r.status);
+                const d = await r.json();
+                document.getElementById('count-problema').textContent = d.problemas ?? 0;
+                document.getElementById('count-ideia').textContent = d.ideias ?? 0;
+                const totalEl = document.getElementById('stat-total');
+                if (totalEl) totalEl.textContent = (d.total ?? 0) + ' participações';
+                console.log('Contadores atualizados:', d);
+            } catch (err) {
+                console.warn('Falha ao buscar totais:', err);
+                // mantém 0
+            }
+        }
+        atualizarContadores();
+        setInterval(atualizarContadores, 15000);
+
                     };
                     
                     recognition.start();
@@ -611,6 +695,27 @@
                 validationHint.classList.add('hidden');
                 submitBtn.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i> Enviado!';
                 if (window.lucide) lucide.createIcons();
+
+        // === CONTAGEM REAL DA PLANILHA ===
+        const STATS_URL = 'https://script.google.com/macros/s/AKfycbwszmmKjZRLbEB0-aAkqW0dOUvAsFWQALkWvS2bYMhgYv_xCQsJfFTCIL1ZoqqJ2xRT/exec';
+        async function atualizarContadores() {
+            try {
+                const r = await fetch(STATS_URL + '?_=' + Date.now());
+                if (!r.ok) throw new Error('HTTP ' + r.status);
+                const d = await r.json();
+                document.getElementById('count-problema').textContent = d.problemas ?? 0;
+                document.getElementById('count-ideia').textContent = d.ideias ?? 0;
+                const totalEl = document.getElementById('stat-total');
+                if (totalEl) totalEl.textContent = (d.total ?? 0) + ' participações';
+                console.log('Contadores atualizados:', d);
+            } catch (err) {
+                console.warn('Falha ao buscar totais:', err);
+                // mantém 0
+            }
+        }
+        atualizarContadores();
+        setInterval(atualizarContadores, 15000);
+
                 
                 // Reset form after delay
                 setTimeout(() => {
@@ -623,6 +728,27 @@
                     successMsg.classList.add('hidden');
                     submitBtn.innerHTML = '<i data-lucide="send" class="w-4 h-4"></i> Enviar Participação';
                     if (window.lucide) lucide.createIcons();
+
+        // === CONTAGEM REAL DA PLANILHA ===
+        const STATS_URL = 'https://script.google.com/macros/s/AKfycbwszmmKjZRLbEB0-aAkqW0dOUvAsFWQALkWvS2bYMhgYv_xCQsJfFTCIL1ZoqqJ2xRT/exec';
+        async function atualizarContadores() {
+            try {
+                const r = await fetch(STATS_URL + '?_=' + Date.now());
+                if (!r.ok) throw new Error('HTTP ' + r.status);
+                const d = await r.json();
+                document.getElementById('count-problema').textContent = d.problemas ?? 0;
+                document.getElementById('count-ideia').textContent = d.ideias ?? 0;
+                const totalEl = document.getElementById('stat-total');
+                if (totalEl) totalEl.textContent = (d.total ?? 0) + ' participações';
+                console.log('Contadores atualizados:', d);
+            } catch (err) {
+                console.warn('Falha ao buscar totais:', err);
+                // mantém 0
+            }
+        }
+        atualizarContadores();
+        setInterval(atualizarContadores, 15000);
+
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                 }, 2500);
                 
@@ -632,12 +758,54 @@
                 submitBtn.innerHTML = '<i data-lucide="send" class="w-4 h-4"></i> Enviar Participação';
                 alert('Erro ao enviar. Tente novamente.');
                 if (window.lucide) lucide.createIcons();
+
+        // === CONTAGEM REAL DA PLANILHA ===
+        const STATS_URL = 'https://script.google.com/macros/s/AKfycbwszmmKjZRLbEB0-aAkqW0dOUvAsFWQALkWvS2bYMhgYv_xCQsJfFTCIL1ZoqqJ2xRT/exec';
+        async function atualizarContadores() {
+            try {
+                const r = await fetch(STATS_URL + '?_=' + Date.now());
+                if (!r.ok) throw new Error('HTTP ' + r.status);
+                const d = await r.json();
+                document.getElementById('count-problema').textContent = d.problemas ?? 0;
+                document.getElementById('count-ideia').textContent = d.ideias ?? 0;
+                const totalEl = document.getElementById('stat-total');
+                if (totalEl) totalEl.textContent = (d.total ?? 0) + ' participações';
+                console.log('Contadores atualizados:', d);
+            } catch (err) {
+                console.warn('Falha ao buscar totais:', err);
+                // mantém 0
+            }
+        }
+        atualizarContadores();
+        setInterval(atualizarContadores, 15000);
+
             }
         });
 
         // Init
         document.addEventListener('DOMContentLoaded', () => {
             if (window.lucide) lucide.createIcons();
+
+        // === CONTAGEM REAL DA PLANILHA ===
+        const STATS_URL = 'https://script.google.com/macros/s/AKfycbwszmmKjZRLbEB0-aAkqW0dOUvAsFWQALkWvS2bYMhgYv_xCQsJfFTCIL1ZoqqJ2xRT/exec';
+        async function atualizarContadores() {
+            try {
+                const r = await fetch(STATS_URL + '?_=' + Date.now());
+                if (!r.ok) throw new Error('HTTP ' + r.status);
+                const d = await r.json();
+                document.getElementById('count-problema').textContent = d.problemas ?? 0;
+                document.getElementById('count-ideia').textContent = d.ideias ?? 0;
+                const totalEl = document.getElementById('stat-total');
+                if (totalEl) totalEl.textContent = (d.total ?? 0) + ' participações';
+                console.log('Contadores atualizados:', d);
+            } catch (err) {
+                console.warn('Falha ao buscar totais:', err);
+                // mantém 0
+            }
+        }
+        atualizarContadores();
+        setInterval(atualizarContadores, 15000);
+
             updateCounter(problema, problemaCounter, true);
             updateCounter(solucao, solucaoCounter, false);
             validateForm();
