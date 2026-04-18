@@ -471,7 +471,7 @@
                     <div class="flex items-center justify-between mb-2">
                         <label class="text-base font-semibold text-gray-900">PROBLEMA <span class="text-red-500">*</span></label>
                         <button type="button" id="voice-problema" class="inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:text-primary-dark bg-primary/5 hover:bg-primary/10 px-3 py-1.5 rounded-lg transition">
-                            <i data-lucide="mic" class="w-3.5 h-3.5"></i> Falar
+                            <i data-lucide="mic" class="w-3.5 h-3.5"></i> Falar em vez de digitar
                         </button>
                     </div>
                     
@@ -503,7 +503,7 @@
                     <div class="flex items-center justify-between mb-2">
                         <label class="text-base font-semibold text-gray-900">IDEIA / SOLUÇÃO <span class="text-red-500">*</span></label>
                         <button type="button" id="voice-solucao" class="inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:text-primary-dark bg-primary/5 hover:bg-primary/10 px-3 py-1.5 rounded-lg transition disabled:opacity-40" disabled>
-                            <i data-lucide="mic" class="w-3.5 h-3.5"></i> Falar
+                            <i data-lucide="mic" class="w-3.5 h-3.5"></i> Falar em vez de digitar
                         </button>
                     </div>
                     
@@ -714,14 +714,14 @@
                 
                 recognition.onend = () => {
                     recognizing = false;
-                    btn.innerHTML = '<i data-lucide="mic" class="w-3.5 h-3.5"></i> Falar';
+                    btn.innerHTML = '<i data-lucide="mic" class="w-3.5 h-3.5"></i> Falar em vez de digitar';
                     btn.classList.remove('text-red-600', 'bg-red-50');
                     if (window.lucide) lucide.createIcons();
                 };
                 
                 recognition.onerror = () => {
                     recognizing = false;
-                    btn.innerHTML = '<i data-lucide="mic" class="w-3.5 h-3.5"></i> Falar';
+                    btn.innerHTML = '<i data-lucide="mic" class="w-3.5 h-3.5"></i> Falar em vez de digitar';
                     btn.classList.remove('text-red-600', 'bg-red-50');
                     if (window.lucide) lucide.createIcons();
                 };
