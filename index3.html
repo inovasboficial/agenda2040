@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agenda 2040 São Borja - Sua Voz Constrói o Futuro</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+  
+  * {
+    font-family: 'Poppins', sans-serif;
+  }
+  
+  body {
+    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 50%, #bbf7d0 100%);
+  }
+  
+  .glass {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+  }
+  
+  .glass-dark {
+    background: rgba(20, 83, 45, 0.95);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+  
+  .gradient-text {
+    background: linear-gradient(135deg, #15803d 0%, #16a34a 50%, #22c55e 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .btn-primary {
+    background: linear-gradient(135deg, #15803d 0%, #16a34a 100%);
+    box-shadow: 0 10px 30px -10px rgba(21, 128, 61, 0.5);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .btn-primary:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 15px 40px -10px rgba(21, 128, 61, 0.6);
+  }
+  
+  .btn-primary:active:not(:disabled) {
+    transform: translateY(0px);
+  }
+  
+  .btn-primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  
+  .card-hover {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .card-hover:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.15);
+  }
+  
+  .pulse-ring {
+    animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+  
+  @keyframes pulse-ring {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(1.05); }
+  }
+  
+  .fade-in {
+    animation: fadeIn 0.6s ease-out forwards;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  .toast {
+    animation: slideInRight 0.4s ease-out;
+  }
+  
+  @keyframes slideInRight {
+    from { transform: translateX(400px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+  
+  textarea {
+    min-height: 200px;
+    resize: vertical;
+  }
+  
+  @media (max-width: 768px) {
+    textarea {
+      min-height: 220px;
+      font-size: 16px;
+    }
+  }
+  
+  .leaflet-container {
+    font-family: 'Poppins', sans-serif;
+  }
+  
+  .custom-marker {
+    background: linear-gradient(135deg, #15803d 0%, #16a34a 100%);
+    border: 3px solid white;
+    border-radius: 50%;
+    box-shadow: 0 4px 12px rgba(21, 128, 61, 0.4);
+  }
+  
+  .progress-bar {
+    transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  input:focus, textarea:focus, select:focus {
+    outline: none;
+    border-color: #16a34a;
+    box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1);
+  }
+  
+  .skeleton {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+  }
+  
+  @keyframes loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+</style>
+</head>
+<body class="min-h-screen">
+  <!-- Toast Container -->
+  <div id="toastContainer" class="fixed top-4 right-4 z-[9999] space-y-2"></div>
+
+  <!-- Header -->
+  <header class="glass-dark text-white shadow-2xl sticky top-0 z-50">
+    <div class="container mx-auto px-4 py-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center shadow-lg">
+            <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+            </svg>
+          </div>
+          <div>
+            <h1 class="text-xl md:text-2xl font-bold">Agenda 2040</h1>
+            <p class="text-xs md:text-sm text-green-100">São Borja - RS</p>
+          </div>
+        <button id="btnAudioHero" class="glass px-4 py-2 md:px-6 md:py-3 rounded-xl font-semibold text-sm md:text-base text-green-900 hover:bg-white transition-all flex items-center gap-2 shadow-lg">
+          <span id="audioIcon">▶️</span>
+          <span class="hidden sm:inline">Ouvir sobre a Agenda 2040</span>
+          <span class="sm:hidden">Ouvir</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="py-12 md:py-20 px-4">
+    <div class="container mx-auto max-w-6xl">
+      <div class="text-center fade-in">
+        <div class="inline-block mb-6 px-6 py-2 bg-green-100 rounded-full">
+          <span class="text-green-800 font-semibold text-sm">🗣️ Participação Cidadã Ativa</span>
+        </div>
+        <h2 class="text-4xl md:text-6xl lg:text-7xl font-extrabold mb-6 leading-tight">
+          Sua voz constrói o <span class="gradient-text">futuro</span> de São Borja
+        </h2>
+        <p class="text-lg md:text-xl text-gray-700 max-w-3xl mx-auto mb-8 leading-relaxed">
+          Participe da construção coletiva do Plano de Desenvolvimento até 2040. Conte os problemas da sua comunidade e sugira soluções. Cada participação importa!
+        </p>
+        <a href="#formParticipacao" class="btn-primary inline-block px-8 py-4 rounded-2xl text-white font-bold text-lg">
+          Quero Participar Agora →
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats Section -->
+  <section class="py-8 md:py-12 px-4">
+    <div class="container mx-auto max-w-6xl">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+        <div class="glass rounded-2xl p-6 md:p-8 card-hover">
+          <div class="flex items-center justify-between mb-4">
+            <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center">
+              <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+              </svg>
+            </div>
+          </div>
+          <div id="statVozes" class="text-4xl md:text-5xl font-extrabold gradient-text mb-2">
+            <div class="skeleton h-12 w-24 rounded-lg"></div>
+          </div>
+          <p class="text-gray-600 font-semibold">Vozes Participantes</p>
+        </div>
+
+        <div class="glass rounded-2xl p-6 md:p-8 card-hover">
+          <div class="flex items-center justify-between mb-4">
+            <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center">
+              <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+              </svg>
+            </div>
+          <div id="statIdeias" class="text-4xl md:text-5xl font-extrabold gradient-text mb-2">
+            <div class="skeleton h-12 w-24 rounded-lg"></div>
+          </div>
+          <p class="text-gray-600 font-semibold">Ideias Registradas</p>
+        </div>
+
+        <div class="glass rounded-2xl p-6 md:p-8 card-hover">
+          <div class="flex items-center justify-between mb-4">
+            <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-teal-500 to-teal-600 flex items-center justify-center">
+              <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+              </svg>
+            </div>
+          <div id="statEixos" class="text-4xl md:text-5xl font-extrabold gradient-text mb-2">
+            <div class="skeleton h-12 w-24 rounded-lg"></div>
+          </div>
+          <p class="text-gray-600 font-semibold">Eixos Ativos</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Eixos Section -->
+  <section class="py-8 md:py-12 px-4">
+    <div class="container mx-auto max-w-6xl">
+      <div class="text-center mb-10">
+        <h3 class="text-3xl md:text-4xl font-bold mb-3 gradient-text">Eixos Temáticos</h3>
+        <p class="text-gray-600">Distribuição das participações por área</p>
+      </div>
+      <div id="eixosContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+        <div class="glass rounded-2xl p-6">
+          <div class="skeleton h-6 w-32 rounded mb-3"></div>
+          <div class="skeleton h-4 w-full rounded mb-2"></div>
+          <div class="skeleton h-8 w-16 rounded"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Form Section -->
+  <section id="formParticipacao" class="py-12 md:py-16 px-4">
+    <div class="container mx-auto max-w-4xl">
+      <div class="glass rounded-3xl p-6 md:p-10 shadow-2xl">
+        <div class="text-center mb-8">
+          <h3 class="text-3xl md:text-4xl font-bold mb-3 gradient-text">Participe Agora</h3>
+          <p class="text-gray-600">Sua contribuição leva menos de 2 minutos e faz a diferença</p>
+        </div>
+
+        <!-- Location Status -->
+        <div id="locationStatus" class="mb-6 p-4 rounded-xl bg-blue-50 border-2 border-blue-200 hidden">
+          <div class="flex items-center gap-3">
+            <div id="locationIcon" class="text-2xl">📍</div>
+            <div class="flex-1">
+              <p id="locationText" class="font-semibold text-gray-800">Validando localização...</p>
+              <p id="locationSubtext" class="text-sm text-gray-600"></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dicas Section -->
+        <div class="mb-8 p-5 md:p-6 rounded-2xl bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-200">
+          <div class="flex items-start gap-3 mb-4">
+            <span class="text-3xl">💡</span>
+            <div>
+              <h4 class="text-lg font-bold text-green-900 mb-1">Como participar bem:</h4>
+              <p class="text-sm text-green-700">Siga estas dicas para uma contribuição de qualidade</p>
+            </div>
+          </div>
+          <ul class="space-y-2 text-sm md:text-base text-gray-700">
+            <li class="flex items-start gap-2">
+              <span class="text-green-600 font-bold mt-0.5">1)</span>
+              <span>Descreva o local/situação do problema</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-green-600 font-bold mt-0.5">2)</span>
+              <span>Explique por que isso afeta a comunidade</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-green-600 font-bold mt-0.5">3)</span>
+              <span>Proponha uma solução prática</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-green-600 font-bold mt-0.5">4)</span>
+              <span>Seja específico com números quando possível</span>
+            </li>
+          </ul>
+        </div>
+
+        <form id="participacaoForm" class="space-y-6">
+          <input type="hidden" id="lat" name="lat">
+          <input type="hidden" id="lng" name="lng">
+
+          <!-- Eixo Temático -->
+          <div>
+            <label for="eixo" class="block font-bold text-gray-800 mb-2 text-lg">
+              Eixo temático *
+            </label>
+            <select id="eixo" name="eixo" required
+              class="w-full px-5 py-4 rounded-xl border-2 border-gray-200 bg-white text-gray-800 font-medium text-base md:text-lg transition-all">
+              <option value="">Selecione o eixo temático</option>
+              <option value="Saude">🏥 Saúde</option>
+              <option value="Educacao">📚 Educação</option>
+              <option value="Infraestrutura">🏗️ Infraestrutura</option>
+              <option value="Meio Ambiente">🌳 Meio Ambiente</option>
+              <option value="Economia">💼 Economia</option>
+            </select>
+          </div>
+
+          <!-- Participação -->
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <label for="participacao" class="block font-bold text-gray-800 text-lg">
+                Descreva sua participação *
+              </label>
+              <button type="button" id="btnVoiceInput" 
+                class="px-4 py-2 rounded-lg bg-green-100 text-green-800 font-semibold text-sm hover:bg-green-200 transition-all flex items-center gap-2">
+                <span id="voiceIcon">🎤</span>
+                <span>Falar</span>
+              </button>
+            </div>
+            <p class="text-sm text-gray-600 mb-3">Conte o problema e sua ideia de solução juntos</p>
+            <textarea id="participacao" name="participacao" required minlength="150" maxlength="3000"
+              class="w-full px-5 py-4 rounded-xl border-2 border-gray-200 bg-white text-gray-800 text-base transition-all"
+              placeholder="Exemplo: Na Rua das Flores, próximo à escola, há falta de iluminação pública há mais de 6 meses. Isso afeta cerca de 200 famílias que não se sentem seguras para caminhar à noite, principalmente estudantes e trabalhadores. Minha sugestão é instalar 8 postes de LED no trecho de 400 metros, com custo estimado de R$ 15 mil, que pode ser viabilizado por emenda parlamentar ou parceria público-privada."></textarea>
+            <div class="flex justify-between items-center mt-2">
+              <span id="charCounter" class="text-sm font-semibold text-gray-500">0 / 3000 (mínimo 150)</span>
+              <span id="qualityIndicator" class="text-sm font-semibold"></span>
+            </div>
+          </div>
+
+          <!-- Submit Button -->
+          <button type="submit" id="submitBtn" 
+            class="btn-primary w-full py-5 rounded-xl text-white font-bold text-lg md:text-xl flex items-center justify-center gap-3">
+            <span id="submitText">Enviar Participação</span>
+            <svg id="submitIcon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+            </svg>
+            <div id="submitSpinner" class="hidden w-6 h-6 border-3 border-white border-t-transparent rounded-full animate-spin"></div>
+          </button>
+
+          <p class="text-xs text-center text-gray-500 mt-4">
+            * Campos obrigatórios. Seus dados são tratados conforme a LGPD.
+          </p>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- Map Section -->
+  <section class="py-8 md:py-12 px-4">
+    <div class="container mx-auto max-w-6xl">
+      <div class="text-center mb-8">
+        <h3 class="text-3xl md:text-4xl font-bold mb-3 gradient-text">Mapa de Participações</h3>
+        <p class="text-gray-600">Visualize onde a comunidade está participando</p>
+      </div>
+      <div class="glass rounded-3xl p-4 md:p-6 shadow-2xl">
+        <div id="map" class="w-full h-[400px] md:h-[500px] rounded-2xl overflow-hidden"></div>
+        <p class="text-xs text-center text-gray-500 mt-3">
+          💚 Mapa centrado em São Borja - RS. Suas participações aparecem aqui após aprovação.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="glass-dark text-white py-8 md:py-12 mt-12">
+    <div class="container mx-auto px-4 text-center">
+      <div class="mb-6">
+        <h4 class="text-2xl font-bold mb-2">Agenda 2040 São Borja</h4>
+        <p class="text-green-100">Construindo juntos o futuro da nossa cidade</p>
+      </div>
+      <div class="flex flex-wrap justify-center gap-6 mb-6 text-sm">
+        <a href="#" class="text-green-200 hover:text-white transition">Sobre o Projeto</a>
+        <a href="#" class="text-green-200 hover:text-white transition">Transparência</a>
+        <a href="#" class="text-green-200 hover:text-white transition">LGPD</a>
+        <a href="#" class="text-green-200 hover:text-white transition">Contato</a>
+      </div>
+      <p class="text-xs text-green-200">
+        © 2024 Prefeitura Municipal de São Borja - RS. Todos os direitos reservados.
+      </p>
+    </div>
+  </footer>
+
+<script>
+  const API_URL = 'https://script.google.com/macros/s/AKfycbxADSjaaaVShJUIrNS0BVHE3InQsEbd4hjguXJTMGAUkL6ZPuJOnI5B2bbGMwP8JSuAnA/exec';
+  const SAO_BORJA_BOUNDS = { minLat: -29.1, maxLat: -28.3, minLng: -56.3, maxLng: -55.7 };
+  const SAO_BORJA_CENTER = [-28.6603, -56.0046];
+  
+  let map = null;
+  let markersLayer = null;
+  let isSpeaking = false;
+  let speechSynthesis = window.speechSynthesis;
+  let recognition = null;
+  let isRecording = false;
+  
+  // Initialize Map
+  function initMap() {
+    map = L.map('map').setView(SAO_BORJA_CENTER, 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap',
+      maxZoom: 18
+    }).addTo(map);
+    markersLayer = L.layerGroup().addTo(map);
+  }
+  
+  // Toast Notifications
+  function showToast(message, type = 'success') {
+    const toast = document.createElement('div');
+    const bgColor = type === 'success' ? 'bg-green-600' : type === 'error' ? 'bg-red-600' : 'bg-blue-600';
+    const icon = type === 'success' ? '✓' : type === 'error' ? '✕' : 'ℹ';
+    
+    toast.className = `toast ${bgColor} text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 min-w-[300px]`;
+    toast.innerHTML = `
+      <span class="text-2xl">${icon}</span>
+      <span class="flex-1 font-semibold">${message}</span>
+    `;
+    
+    document.getElementById('toastContainer').appendChild(toast);
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      toast.style.transform = 'translateX(400px)';
+      setTimeout(() => toast.remove(), 300);
+    }, 4000);
+  }
+  
+  // Geolocation
+  function requestGeolocation() {
+    const statusEl = document.getElementById('locationStatus');
+    const iconEl = document.getElementById('locationIcon');
+    const textEl = document.getElementById('locationText');
+    const subtextEl = document.getElementById('locationSubtext');
+    
+    statusEl.classList.remove('hidden');
+    statusEl.className = 'mb-6 p-4 rounded-xl bg-blue-50 border-2 border-blue-200';
+    iconEl.textContent = '📍';
+    textEl.textContent = 'Validando localização...';
+    subtextEl.textContent = 'Aguarde enquanto verificamos sua posição';
+    
+    if (!navigator.geolocation) {
+      iconEl.textContent = '⚠️';
+      textEl.textContent = 'Geolocalização não disponível';
+      subtextEl.textContent = 'Você pode enviar mesmo assim';
+      statusEl.className = 'mb-6 p-4 rounded-xl bg-yellow-50 border-2 border-yellow-200';
+      return;
+    }
+    
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        
+        document.getElementById('lat').value = lat;
+        document.getElementById('lng').value = lng;
+        
+        const isInSaoBorja = lat >= SAO_BORJA_BOUNDS.minLat && 
+                            lat <= SAO_BORJA_BOUNDS.maxLat && 
+                            lng >= SAO_BORJA_BOUNDS.minLng && 
+                            lng <= SAO_BORJA_BOUNDS.maxLng;
+        
+        if (isInSaoBorja) {
+          iconEl.textContent = '✓';
+          textEl.textContent = 'Você está em São Borja';
+          subtextEl.textContent = 'Localização validada com sucesso';
+          statusEl.className = 'mb-6 p-4 rounded-xl bg-green-50 border-2 border-green-200';
+        } else {
+          iconEl.textContent = '⚠️';
+          textEl.textContent = 'Fora do município';
+          subtextEl.textContent = 'Sua participação será registrada, mas você parece estar fora de São Borja';
+          statusEl.className = 'mb-6 p-4 rounded-xl bg-yellow-50 border-2 border-yellow-200';
+        }
+      },
+      (error) => {
+        iconEl.textContent = '⚠️';
+        textEl.textContent = 'Localização não autorizada';
+        subtextEl.textContent = 'Você pode enviar mesmo assim. Permita a localização para melhor experiência';
+        statusEl.className = 'mb-6 p-4 rounded-xl bg-yellow-50 border-2 border-yellow-200';
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
+  }
+  
+  // Text to Speech
+  function toggleSpeech() {
+    const btn = document.getElementById('btnAudioHero');
+    const icon = document.getElementById('audioIcon');
+    
+    if (isSpeaking) {
+      speechSynthesis.cancel();
+      isSpeaking = false;
+      icon.textContent = '▶️';
+    } else {
+      const text = "A Agenda 2040 de São Borja é construída com você. Sua participação é fundamental para definir o futuro da nossa cidade. Cada ideia conta. A comunidade está no centro das decisões. Participe!";
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'pt-BR';
+      utterance.rate = 0.95;
+      utterance.pitch = 1;
+      
+      utterance.onend = () => {
+        isSpeaking = false;
+        icon.textContent = '▶️';
+      };
+      
+      speechSynthesis.speak(utterance);
+      isSpeaking = true;
+      icon.textContent = '⏸️';
+    }
+  }
+  
+  // Speech Recognition
+  function initSpeechRecognition() {
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+      document.getElementById('btnVoiceInput').style.display = 'none';
+      return;
+    }
+    
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    recognition = new SpeechRecognition();
+    recognition.lang = 'pt-BR';
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    
+    recognition.onstart = () => {
+      isRecording = true;
+      document.getElementById('voiceIcon').textContent = '🔴';
+      document.getElementById('btnVoiceInput').classList.add('pulse-ring');
+      showToast('Ouvindo... Fale agora', 'info');
+    };
+    
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      const textarea = document.getElementById('participacao');
+      textarea.value = textarea.value ? textarea.value + ' ' + transcript : transcript;
+      textarea.dispatchEvent(new Event('input'));
+      showToast('Texto adicionado com sucesso!', 'success');
+    };
+    
+    recognition.onerror = (event) => {
+      showToast('Erro ao reconhecer voz. Tente novamente.', 'error');
+    };
+    
+    recognition.onend = () => {
+      isRecording = false;
+      document.getElementById('voiceIcon').textContent = '🎤';
+      document.getElementById('btnVoiceInput').classList.remove('pulse-ring');
+    };
+  }
+  
+  function toggleVoiceInput() {
+    if (!recognition) return;
+    
+    if (isRecording) {
+      recognition.stop();
+    } else {
+      recognition.start();
+    }
+  }
+  
+  // Character Counter
+  function updateCharCounter() {
+    const textarea = document.getElementById('participacao');
+    const counter = document.getElementById('charCounter');
+    const quality = document.getElementById('qualityIndicator');
+    const length = textarea.value.length;
+    
+    counter.textContent = `${length} / 3000 (mínimo 150)`;
+    
+    if (length >= 150) {
+      counter.classList.remove('text-gray-500', 'text-red-600');
+      counter.classList.add('text-green-600');
+      quality.textContent = '✓ Quantidade adequada';
+      quality.classList.remove('text-red-600');
+      quality.classList.add('text-green-600');
+    } else if (length > 0) {
+      counter.classList.remove('text-gray-500', 'text-green-600');
+      counter.classList.add('text-red-600');
+      quality.textContent = `${150 - length} caracteres restantes`;
+      quality.classList.remove('text-green-600');
+      quality.classList.add('text-red-600');
+    } else {
+      counter.classList.remove('text-red-600', 'text-green-600');
+      counter.classList.add('text-gray-500');
+      quality.textContent = '';
+    }
+  }
+  
+  // Load Data from API
+  async function loadData() {
+    try {
+      const response = await fetch(API_URL);
+      const data = await response.json();
+      
+      if (data.error) throw new Error(data.error);
+      
+      // Update Stats
+      document.getElementById('statVozes').innerHTML = data.total_participacoes || 0;
+      document.getElementById('statIdeias').innerHTML = data.total_participacoes || 0;
+      document.getElementById('statEixos').innerHTML = data.eixos ? data.eixos.length : 0;
+      
+      // Update Eixos
+      const eixosContainer = document.getElementById('eixosContainer');
+      if (data.eixos && data.eixos.length > 0) {
+        const maxCount = Math.max(...data.eixos.map(e => e.count));
+        const eixoIcons = {
+          'Saude': '🏥',
+          'Educacao': '📚',
+          'Infraestrutura': '🏗️',
+          'Meio Ambiente': '🌳',
+          'Economia': '💼'
+        };
+        
+        eixosContainer.innerHTML = data.eixos.map(eixo => {
+          const percentage = maxCount > 0 ? (eixo.count / maxCount) * 100 : 0;
+          const icon = eixoIcons[eixo.eixo] || '📌';
+          return `
+            <div class="glass rounded-2xl p-6 card-hover">
+              <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center gap-3">
+                  <span class="text-3xl">${icon}</span>
+                  <h4 class="font-bold text-gray-800 text-lg">${eixo.eixo}</h4>
+                </div>
+                <span class="text-2xl font-extrabold gradient-text">${eixo.count}</span>
+              </div>
+              <div class="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                <div class="progress-bar bg-gradient-to-r from-green-500 to-emerald-600 h-3 rounded-full" style="width: ${percentage}%"></div>
+              </div>
+              <p class="text-xs text-gray-600 mt-2">${eixo.count} ${eixo.count === 1 ? 'participação' : 'participações'}</p>
+            </div>
+          `;
+        }).join('');
+      }
+      
+      // Update Map
+      if (data.mapa && data.mapa.length > 0) {
+        markersLayer.clearLayers();
+        data.mapa.forEach(item => {
+          if (item.lat && item.lng) {
+            const marker = L.circleMarker([item.lat, item.lng], {
+              radius: 8,
+              fillColor: '#16a34a',
+              color: '#fff',
+              weight: 3,
+              opacity: 1,
+              fillOpacity: 0.8
+            });
+            marker.bindPopup(`
+              <div class="p-2">
+                <strong class="text-green-700">${item.eixo}</strong>
+                <p class="text-sm mt-1">${item.tipo}</p>
+              </div>
+            `);
+            markersLayer.addLayer(marker);
+          }
+        });
+      }
+      
+    } catch (error) {
+      console.error('Erro ao carregar dados:', error);
+      showToast('Erro ao carregar dados. Tente recarregar a página.', 'error');
+    }
+  }
+  
+  // Form Submit
+  async function handleSubmit(e) {
+    e.preventDefault();
+    
+    const form = e.target;
+    const submitBtn = document.getElementById('submitBtn');
+    const submitText = document.getElementById('submitText');
+    const submitIcon = document.getElementById('submitIcon');
+    const submitSpinner = document.getElementById('submitSpinner');
+    
+    const eixo = document.getElementById('eixo').value;
+    const participacao = document.getElementById('participacao').value.trim();
+    const lat = document.getElementById('lat').value;
+    const lng = document.getElementById('lng').value;
+    
+    if (!eixo) {
+      showToast('Por favor, selecione um eixo temático', 'error');
+      return;
+    }
+    
+    if (participacao.length < 150) {
+      showToast('Sua participação precisa ter no mínimo 150 caracteres', 'error');
+      return;
+    }
+    
+    // Disable button
+    submitBtn.disabled = true;
+    submitText.textContent = 'Enviando...';
+    submitIcon.classList.add('hidden');
+    submitSpinner.classList.remove('hidden');
+    
+    try {
+      const payload = {
+        tipo: 'participacao',
+        problema: participacao,
+        solucao: participacao,
+        eixo: eixo,
+        lat: lat || null,
+        lng: lng || null
+      };
+      
+      const response = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      
+      const result = await response.json();
+      
+      if (result.ok) {
+        showToast('🎉 Participação enviada com sucesso! Obrigado por contribuir!', 'success');
+        form.reset();
+        document.getElementById('charCounter').textContent = '0 / 3000 (mínimo 150)';
+        document.getElementById('qualityIndicator').textContent = '';
+        document.getElementById('locationStatus').classList.add('hidden');
+        requestGeolocation();
+        loadData();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        throw new Error(result.error || 'Erro ao enviar');
+      }
+    } catch (error) {
+      console.error('Erro ao enviar:', error);
+      showToast('Erro ao enviar participação. Tente novamente.', 'error');
+    } finally {
+      submitBtn.disabled = false;
+      submitText.textContent = 'Enviar Participação';
+      submitIcon.classList.remove('hidden');
+      submitSpinner.classList.add('hidden');
+    }
+  }
+  
+  // Event Listeners
+  document.addEventListener('DOMContentLoaded', () => {
+    initMap();
+    initSpeechRecognition();
+    requestGeolocation();
+    loadData();
+    
+    document.getElementById('btnAudioHero').addEventListener('click', toggleSpeech);
+    document.getElementById('btnVoiceInput').addEventListener('click', toggleVoiceInput);
+    document.getElementById('participacaoForm').addEventListener('submit', handleSubmit);
+    document.getElementById('participacao').addEventListener('input', updateCharCounter);
+    
+    // Auto refresh data every 30s
+    setInterval(loadData, 30000);
+  });
+</script>
+</body>
+</html>
